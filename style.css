@@ -1,0 +1,59 @@
+
+body {
+    background-color: beige;
+}
+
+#main-container {
+    overflow: hidden;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+#left-container {
+    position: relative;
+    width: 68%;
+    float: left;
+    margin: 5px 0 5px 5px;
+    padding: 5px;
+}
+
+#canvas {
+    height: 685px;
+    width: 100%;
+}
+
+#right-container {
+    position: relative;
+    width: 28%;
+    float: right;
+    margin: 5px 5px 5px 0;
+    padding: 10px;
+}
+
+#image {
+    overflow-y: hidden;
+    height: 35px;
+    width: 35px;
+    padding: 5px;
+}
+
+.form-control {
+    width: 70%;
+    margin-bottom: 1px;
+}
+
+#marked-container {
+    height: 100%;
+    width: 100%;
+}
+
+#marked {
+    height: 600px;
+    width: 100%;
+    resize: none;
+}
+
+footer {
+    margin: 5px;
+}
