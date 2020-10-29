@@ -57,6 +57,7 @@ body {
     height: 600px;
     width: 100%;
     resize: none;
+    font-size: smaller;
 }
 
 footer {
