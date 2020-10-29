@@ -325,11 +325,11 @@ window.addEventListener('DOMContentLoaded', () => {
     //
     // À partir d'ici, le code est dépendant de la bibliothèque d'affichage.
     //
-    let containerElt = document.getElementById('canvas-container')
+    let stageContainerElt = document.getElementById('canvas-container')
     let stage = new Konva.Stage({
         container: 'canvas-container',
-        width: containerElt.offsetWidth,
-        height: containerElt.offsetHeight,
+        width: stageContainerElt.offsetWidth,
+        height: stageContainerElt.offsetHeight,
         draggable: true
     })
 
@@ -541,6 +541,14 @@ window.addEventListener('DOMContentLoaded', () => {
     //     let mapJson = JSON.stringify(map)
     //     exportedElt.textContent = mapJson
     // })
+
+    window.addEventListener('resize', () => {
+        const containerWidth = stageContainerElt.offsetWidth
+        const containerHeight = stageContainerElt.offsetHeight
+        stage.width(containerWidth)
+        stage.height(containerHeight)
+        stage.batchDraw()
+    })
 })
 
 function konvaHandleTextInput(kText, onDone) {
