@@ -499,8 +499,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
         kNode.on('dragmove', () => {
             gNode.onDragMove(kNode.x(), kNode.y())
-            // TODO: Le batchDraw est-il vraiment nécessaire ?
-            // mainLayer.batchDraw()
         })
     }
 
