@@ -86,10 +86,12 @@ class GraphicalObject {
         Object.defineProperty(this, property, {
             get: () => this[internalProperty],
             set: value => {
-                this[internalProperty] = value
-                if (this._changeCallbacks[property]) {
-                    for (let cb of this._changeCallbacks[property]) {
-                        cb(value)
+                if (this[internalProperty] !== value) {
+                    this[internalProperty] = value
+                    if (this._changeCallbacks[property]) {
+                        for (let cb of this._changeCallbacks[property]) {
+                            cb(value)
+                        }
                     }
                 }
             }
