@@ -493,7 +493,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     newHeight: kLabel.height(),
                 })
                 updateLinksPos(gLinks, gNodeIndex)
-            })
+            }, true)
         })
 
         kNode.on('dragmove', () => {
@@ -552,7 +552,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
 })
 
-function konvaHandleTextInput(kText, onDone) {
+function konvaHandleTextInput(kText, onInput, bold = false) {
     // Inspiré de https://konvajs.org/docs/sandbox/Editable_Text.html
 
     let stage = kText.getStage()
@@ -582,11 +582,12 @@ function konvaHandleTextInput(kText, onDone) {
     document.body.appendChild(textarea)
 
     const scale = stage.scale().x
+    const originalValue = kText.text()
 
     // apply many styles to match text on canvas as close as possible
     // remember that text rendering on canvas and on the textarea can be different
     // and sometimes it is hard to make it 100% the same. But we will try...
-    textarea.value = kText.text()
+    textarea.value = originalValue
     textarea.style.position = 'absolute'
     textarea.style.top = areaPosition.y + 'px'
     textarea.style.left = areaPosition.x + 'px'
@@ -603,6 +604,7 @@ function konvaHandleTextInput(kText, onDone) {
     textarea.style.resize = 'none'
     textarea.style.lineHeight = kText.lineHeight()
     textarea.style.fontFamily = kText.fontFamily()
+    textarea.style.fontWeight = bold ? 'bold' : 'normal'
     textarea.style.transformOrigin = 'left top'
     textarea.style.textAlign = kText.align()
     textarea.style.color = kText.fill()
@@ -634,9 +636,14 @@ function konvaHandleTextInput(kText, onDone) {
     function removeTextarea() {
         textarea.parentNode.removeChild(textarea)
         window.removeEventListener('click', handleOutsideClick)
-        onDone(textarea.value)
 
         kText.show()
+        layer.draw()
+    }
+
+    function updateText(value) {
+        kText.text(value)
+        onInput(value)
         layer.draw()
     }
 
@@ -664,19 +671,18 @@ function konvaHandleTextInput(kText, onDone) {
     }
 
     textarea.addEventListener('keydown', function (e) {
+        updateText(textarea.value)
         // hide on enter
         // but don't hide on shift + enter
         if (e.keyCode === 13 && !e.shiftKey) {
-            kText.text(textarea.value)
             removeTextarea()
         }
-        // on esc do not set value back to node
+        // on esc reset the original value
         if (e.keyCode === 27) {
+            updateText(originalValue)
             removeTextarea()
         }
-    })
 
-    textarea.addEventListener('keydown', () => {
         // TODO: Le `*5` n'est pas correct.
         setTextareaWidth(kText.width() * kText.getAbsoluteScale().x * 5)
         textarea.style.height = 'auto'
@@ -685,7 +691,7 @@ function konvaHandleTextInput(kText, onDone) {
 
     function handleOutsideClick(e) {
         if (e.target !== textarea) {
-            kText.text(textarea.value)
+            updateText(textarea.value)
             removeTextarea()
         }
     }
