@@ -308,9 +308,8 @@ window.addEventListener('DOMContentLoaded', () => {
             } else {
                 handleFrom.gNode = gNode
             }
-        } else {
-            updateLinkPos(gLink)
         }
+        updateLinkPos(gLink)
     }
 
     for (let link of map.links) {
