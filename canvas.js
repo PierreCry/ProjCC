@@ -122,35 +122,20 @@ class GraphicalObject {
         this._eventsCallbacks[event].push(callback)
     }
 
-    onMouseMove(mouseX, mouseY) {
-        for (let cb of this._eventsCallbacks['mousemove']) {
-            cb(mouseX, mouseY)
-        }
-    }
-
-    onMouseUp() {
-        for (let cb of this._eventsCallbacks['mouseup']) {
-            cb()
-        }
-    }
-
-    onDragMove(newX, newY) {
-        for (let cb of this._eventsCallbacks['dragmove']) {
-            cb(newX, newY)
-        }
-    }
-
-    onDragEnd() {
-        for (let cb of this._eventsCallbacks['dragend']) {
-            cb()
-        }
-    }
-
-    // TODO: Cet événement est plutôt lié à un Label, pas forcément
-    // à tous les objets graphiques.
-    onEndInput(newValue, newWidth, newHeight) {
-        for (let cb of this._eventsCallbacks['endinput']) {
-            cb(newValue, newWidth, newHeight)
+    /**
+     * Déclenche l'événement demandé. Tous les callbacks pour cet événement
+     * seront notifié et recevront les infos associées.
+     *
+     * @param {string} event - Le nom de l'événement
+     * @param {*} eventInfos - Les infos associées à l'événement
+     */
+    fire(event, eventInfos = {}) {
+        if (!this._eventsCallbacks[event]) {
+            console.error('Trying to call an unregistered event callback')
+        } else {
+            for (let cb of this._eventsCallbacks[event]) {
+                cb(eventInfos)
+            }
         }
     }
 }
@@ -164,7 +149,7 @@ class Label extends GraphicalObject {
         this.addProperty('width', width)
         this.addProperty('height', height)
 
-        this.on('endinput', (newValue, newWidth, newHeight) => {
+        this.on('input', ({ newValue, newWidth, newHeight }) => {
             this.text = newValue
             this.width = newWidth
             this.height = newHeight
@@ -180,9 +165,9 @@ class LinkHandle extends GraphicalObject {
         this.addProperty('gNode', gNode)
         this.addProperty('radius', LINK_HANDLE_RADIUS)
 
-        this.on('dragmove', (newX, newY) => {
-            this.x = newX
-            this.y = newY
+        this.on('dragmove', ({ x, y }) => {
+            this.x = x
+            this.y = y
         })
     }
 }
@@ -197,9 +182,9 @@ class GraphicalNode extends GraphicalObject {
         this.addProperty('width')
         this.addProperty('height')
 
-        this.on('dragmove', (newX, newY) => {
-            this.x = newX
-            this.y = newY
+        this.on('dragmove', ({ x, y }) => {
+            this.x = x
+            this.y = y
         })
 
         // Mise à jour du nom quand le label change
@@ -383,17 +368,23 @@ window.addEventListener('DOMContentLoaded', () => {
         kLabels.add(kEndHandle)
 
         kStartHandle.on('dragmove', () => {
-            gLink.handleFrom.onDragMove(kStartHandle.x(), kStartHandle.y())
+            gLink.handleFrom.fire('dragmove', {
+                x: kStartHandle.x(),
+                y: kStartHandle.y(),
+            })
         })
         kEndHandle.on('dragmove', () => {
-            gLink.handleTo.onDragMove(kEndHandle.x(), kEndHandle.y())
+            gLink.handleTo.fire('dragmove', {
+                x: kEndHandle.x(),
+                y: kEndHandle.y(),
+            })
         })
         kStartHandle.on('dragend', () => {
-            gLink.handleFrom.onDragEnd()
+            gLink.handleFrom.fire('dragend')
             mainLayer.draw()
         })
         kEndHandle.on('dragend', () => {
-            gLink.handleTo.onDragEnd()
+            gLink.handleTo.fire('dragend')
             mainLayer.draw()
         })
 
@@ -436,7 +427,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
         kLabel.on('dblclick', () => {
             konvaHandleTextInput(kText, newValue => {
-                gLink.label.onEndInput(newValue, kLabel.width(), kLabel.height())
+                gLink.label.fire('input', {
+                    newValue,
+                    newWidth: kLabel.width(),
+                    newHeight: kLabel.height(),
+                })
             })
         })
 
@@ -492,13 +487,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
         kNode.on('dblclick', () => {
             konvaHandleTextInput(kText, newValue => {
-                gNode.label.onEndInput(newValue, kLabel.width(), kLabel.height())
+                gNode.label.fire('input', {
+                    newValue,
+                    newWidth: kLabel.width(),
+                    newHeight: kLabel.height(),
+                })
                 updateLinksPos(gLinks, gNodeIndex)
             })
         })
 
         kNode.on('dragmove', () => {
-            gNode.onDragMove(kNode.x(), kNode.y())
+            gNode.fire('dragmove', {
+                x: kNode.x(),
+                y: kNode.y(),
+            })
         })
     }
 
