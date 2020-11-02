@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="Style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
+        rel="stylesheet">
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="script.js" type="text/javascript"></script>
+    <script src="canvas.js" type="text/javascript"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
+
+    <script src="https://kit.fontawesome.com/5cfb8f8806.js" crossorigin="anonymous"></script>
+
+    <style>
+        ul {
+            list-style-type: none;
+            margin-left: 50px;
+            margin-top: 20px;
+            margin-right: 200px;
+            margin-bottom: 0px;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a:hover:not(.active) {
+            color: #f4f7f8;
+        }
+
+        .button {
+            background-color: #f4f7f8;
+            border: none;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            font-size: 13pt;
+            letter-spacing: 0.8px;
+            color: #000000;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 0px;
+            font-size: 16px;
+            margin-top: -6px;
+            margin-right: 20px;
+            cursor: pointer;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+        }
+
+        .button1 {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .column1 {
+            float: left;
+            width: 70%;
+            margin: 0px;
+            padding: 20px;
+            /* Should be removed. Only for demonstration */
+        }
+
+        .column2 {
+            float: left;
+            width: 20%;
+            margin: 0px;
+            padding: 20px;
+            /* Should be removed. Only for demonstration */
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+
+    <ul>
+        <li><a class="t1" href="#Nouveau">Nouveau</a></li>
+        <li><a class="t1" href="#fermer">Enregistrer</a></li>
+        <li><a class="t1" href="#Enregistrersous">Enregistrer sous</a></li>
+        <li><a class="t1" href="#Enregistrer">Exporter</a></li>
+        <li><a class="t1" href="#Importer">Importer</a></li>
+        <li><a class="t1" href="#Imprimer">Imprimer</a></li>
+        <li style="float:right"><a class="t4 fas fa-moon" href="#moon"></a></li>
+        <li style="float:right"><a class="t2 fas fa-redo" href="#redo_black"></a></li>
+        <li style="float:right"><a class="t2 fas fa-undo" href="#undo_black"></a></li>
+        <li style="float:right"><button class="button button1" href="#run"> <a class="t1">Compiler <c class="t3 fas fa-play"></c></button></li>
+    </ul>
+
+    <!--The tab -->
+    <div class="tab">
+        <button class="t5 tablinks" onclick="openCity(event, 'P1')" id="defaultOpen">Projet 1</button>
+        <button class="t5 tablinks" onclick="openCity(event, 'P2')">Projet 2</button>
+        <button class="t5 tablinks" onclick="openCity(event, 'P3')">Projet 3</button>
+    </div>
+
+    <div id="P1" class="tabcontent">
+        <div class="row">
+            <div class="column1" style="background-color:#192c33;">
+                <div id="canvas-container" style="background-color: #f4f7f8; border: none;">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+            <div class="column2" style="background-color:#192c33;">
+                <div id="option-container">
+                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 5px; width: 70%;">
+                </div>
+                <div id="marked-container">
+                    <textarea id="marked" style="background-color: #f4f7f8; border: none;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="P2" class="tabcontent">
+        <div class="row">
+            <div class="column1" style="background-color:#192c33;">
+                <div id="canvas-container" style="background-color: #f4f7f8; border: none;">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+            <div class="column2" style="background-color:#192c33;">
+                <div id="option-container">
+                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 5px; width: 70%;">
+                </div>
+                <div id="marked-container">
+                    <textarea id="marked" style="background-color: #f4f7f8; border: none;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="P3" class="tabcontent">
+        <div class="row">
+            <div class="column1" style="background-color:#192c33;">
+                <div id="canvas-container" style="background-color: #f4f7f8; border: none;">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+            <div class="column2" style="background-color:#192c33;">
+                <div id="option-container">
+                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 5px; width: 70%;">
+                </div>
+                <div id="marked-container">
+                    <textarea id="marked" style="background-color: #f4f7f8; border: none;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="t6">&copy; Copyright 2020 ... - Version 1.0</footer>
+
+    <script>
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+    </script>
+
+</body>
+
+</html>
