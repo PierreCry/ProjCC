@@ -20,7 +20,7 @@
 <body>
     <!-- Nav Header -->
     <ul>
-        <li><a class="t1" href="#Nouveau">Nouveau</a></li>
+        <li><a class="t1" href="#Nouveau" onclick="New()">Nouveau</a></li>
         <li><a class="t1" href="#fermer">Enregistrer</a></li>
         <li><a class="t1" href="#Enregistrersous">Enregistrer sous</a></li>
         <li><a class="t1" href="#Enregistrer">Exporter</a></li>
@@ -35,95 +35,39 @@
 
     <!-- Tabs -->
     <div class="tab">
-        <button class="t5 tablinks" onclick="openCity(event, 'P1')" id="defaultOpen">Projet 1</button>
-        <button class="t5 tablinks" onclick="openCity(event, 'P2')">Projet 2</button>
-        <button class="t5 tablinks" onclick="openCity(event, 'P3')">Projet 3</button>
+        <button class="t5 tablinks" onclick="openCity(event,1)" id="defaultOpen">Projet 1</button>
     </div>
 
-    <div id="P1" class="tabcontent">
-        <div class="row">
-            <!-- Canvas menu -->
-            <div class="column3">
-                <div class="icon-bar">
-                    <a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a> 
-                    <a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a> 
-                    <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
+    <div class="content"></div>
+        <div id="P1" class="tabcontent">
+            <div class="row">
+                <!-- Canvas menu -->
+                <div class="column3">
+                    <div class="icon-bar">
+                        <a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a> 
+                        <a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a> 
+                        <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
+                    </div>
                 </div>
-            </div>
-            <!-- Canvas -->
-            <div class="column1">
-                <div id="canvas-container">
-                    <canvas id="canvas"></canvas>
+                <!-- Canvas -->
+                <div class="column1">
+                    <div id="canvas-container">
+                        <canvas id="canvas"></canvas>
+                    </div>
                 </div>
-            </div>
-            <!-- Marked for tags -->
-            <div class="column2">
-                <div id="option-container">
-                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 5px 0px; width: 70%;">
-                </div>
-                <div id="marked-container">
-                    <textarea id="marked"></textarea>
+                <!-- Marked for tags -->
+                <div class="column2">
+                    <div id="option-container">
+                        <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 5px 0px; width: 70%;">
+                    </div>
+                    <div id="marked-container">
+                        <textarea id="marked"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="P2" class="tabcontent">
-        <div class="row">
-            <!-- Canvas menu -->
-            <div class="column3">
-                <div class="icon-bar">
-                    <a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a> 
-                    <a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a> 
-                    <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
-                </div>
-            </div>
-            <!-- Canvas -->
-            <div class="column1">
-                <div id="canvas-container">
-                    <canvas id="canvas"></canvas>
-                </div>
-            </div>
-            <!-- Marked for tags -->
-            <div class="column2">
-                <div id="option-container">
-                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 5px 0px; width: 70%;">
-                </div>
-                <div id="marked-container">
-                    <textarea id="marked"></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="P3" class="tabcontent">
-        <div class="row">
-            <!-- Canvas menu -->
-            <div class="column3">
-                <div class="icon-bar">
-                    <a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a> 
-                    <a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a> 
-                    <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
-                </div>
-            </div>
-            <!-- Canvas -->
-            <div class="column1">
-                <div id="canvas-container">
-                    <canvas id="canvas"></canvas>
-                </div>
-            </div>
-            <!-- Marked for tags -->
-            <div class="column2">
-                <div id="option-container">
-                    <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 5px 0px; width: 70%;">
-                </div>
-                <div id="marked-container">
-                    <textarea id="marked"></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Footer -->
     <footer class="t6">&copy; Copyright 2020 ... - Version 1.0</footer>
 
