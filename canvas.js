@@ -5,6 +5,69 @@ const NODE_LABEL_OFFSETY = 20
 const LINK_HANDLE_RADIUS = 10
 const ZOOM_SPEED = 1.05
 
+class GraphicalLink {
+    constructor(link, kArrow, kLabel, kStartHandle, kEndHandle) {
+        this.link = link
+        this.kArrow = kArrow
+        this.kLabel = kLabel
+        this.kStartHandle = kStartHandle
+        this.kEndHandle = kEndHandle
+    }
+
+    updateHandles(kNodes) {
+        const startHandlePos = computeArrowIntersection(kNodes.getChildren()[this.link.from], kNodes.getChildren()[this.link.to])
+        const endHandlePos = computeArrowIntersection(kNodes.getChildren()[this.link.to], kNodes.getChildren()[this.link.from])
+        // TODO: On vient de calculer le point d'intersection, mais on va le
+        // recalculer dans `moveStartHandle` et `moveEndHandle` !
+        this.moveStartHandle(kNodes, startHandlePos.x, startHandlePos.y)
+        this.moveEndHandle(kNodes, endHandlePos.x, endHandlePos.y)
+    }
+
+    moveStartHandle(kNodes, newX, newY) {
+        this.kStartHandle.x(newX)
+        this.kStartHandle.y(newY)
+
+        // Mise à jour de la flèche
+        this.kArrow.points()[0] = newX
+        this.kArrow.points()[1] = newY
+
+        // Mise à jour du label
+        const halfLabelWidth = this.kLabel.width() * .5
+        const halfLabelHeight = this.kLabel.height() * .5
+        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
+        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
+
+        // Met à jour l'autre côté de la flèche
+        const end = computeArrowIntersectionFromPoints(kNodes.getChildren()[this.link.to], newX, newY)
+        this.kEndHandle.x(end.x)
+        this.kEndHandle.y(end.y)
+        this.kArrow.points()[2] = end.x
+        this.kArrow.points()[3] = end.y
+    }
+
+    moveEndHandle(kNodes, newX, newY) {
+        this.kEndHandle.x(newX)
+        this.kEndHandle.y(newY)
+
+        // Mise à jour de la flèche
+        this.kArrow.points()[2] = newX
+        this.kArrow.points()[3] = newY
+
+        // Mise à jour du label
+        const halfLabelWidth = this.kLabel.width() * .5
+        const halfLabelHeight = this.kLabel.height() * .5
+        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
+        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
+
+        // Met à jour l'autre côté de la flèche
+        const start = computeArrowIntersectionFromPoints(kNodes.getChildren()[this.link.from], newX, newY)
+        this.kStartHandle.x(start.x)
+        this.kStartHandle.y(start.y)
+        this.kArrow.points()[0] = start.x
+        this.kArrow.points()[1] = start.y
+    }
+}
+
 function computeArrowIntersectionFromPoints(kStartNode, endX, endY) {
     let startX = kStartNode.x() + kStartNode.width() * .5
     let startY = kStartNode.y() + kStartNode.height() * .5
@@ -34,38 +97,24 @@ function computeArrowIntersection(kStartNode, kEndNode) {
     return computeArrowIntersectionFromPoints(kStartNode, endX, endY)
 }
 
-function updateLinksPos(kLinks, nodeIndex = null) {
-    for (let kLink of kLinks) {
-        if (nodeIndex === null ||
-            nodeIndex !== null &&
-            (nodeIndex === kLink.handleFrom.gNode.index ||
-             nodeIndex === kLink.handleTo.gNode.index)
-        ) {
-            updateLinkPos(kLink)
-        }
-    }
-}
-
 window.addEventListener('DOMContentLoaded', () => {
     let map = JSON.parse(mapJSON)
 
     let kMainLayer = new Konva.Layer()
-
-    let state = {
-        // hotHandle: {
-        //     index: 0,
-        //     isFrom: false,
-        // },
-        hotHandle: undefined,
-    }
+    let kDragLayer = new Konva.Layer()
 
     let kNodes = new Konva.Group()
     let kLinks = new Konva.Group()
     kMainLayer.add(kNodes)
     kMainLayer.add(kLinks)
 
+    /** @var GraphicalLink[] */
+    let nodesIncomingLinks = []
+    let nodesOutgoingLinks = []
+    let gLinks = []
+
     let stageContainerElt = document.getElementById('canvas-container')
-    let stage = new Konva.Stage({
+    let kStage = new Konva.Stage({
         container: 'canvas-container',
         width: stageContainerElt.offsetWidth,
         height: stageContainerElt.offsetHeight,
@@ -91,6 +140,16 @@ window.addEventListener('DOMContentLoaded', () => {
         })
         kLabel.add(kText)
 
+        const updateLinks = () => {
+            for (let gLink of nodesIncomingLinks[nodeIndex]) {
+                gLink.updateHandles(kNodes)
+            }
+            for (let gLink of nodesOutgoingLinks[nodeIndex]) {
+                gLink.updateHandles(kNodes)
+            }
+            kMainLayer.batchDraw()
+        }
+
         // Taille initiale du node
         kNode.width(kLabel.width() + NODE_LABEL_OFFSETX)
         kNode.height(kLabel.height() + NODE_LABEL_OFFSETY)
@@ -103,7 +162,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 node.name = newValue
                 kNode.width(kLabel.width() + NODE_LABEL_OFFSETX)
                 kNode.height(kLabel.height() + NODE_LABEL_OFFSETY)
-                // TODO: Il faut mettre à jour la position des flèches ici.
+                updateLinks()
             }, true)
         })
 
@@ -115,6 +174,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             kLabel.x(newX + kNode.width() * .5 - kLabel.width() * .5)
             kLabel.y(newY + kNode.height() * .5 - kLabel.height() * .5)
+            updateLinks()
         })
 
         kNode.on('mousedown', () => {
@@ -153,6 +213,7 @@ window.addEventListener('DOMContentLoaded', () => {
             lineCap: 'round',
             pointerWidth: 10,
             pointerLength: 8,
+            listening: false,
             points: [0, 0, 0, 0]
         })
 
@@ -168,117 +229,81 @@ window.addEventListener('DOMContentLoaded', () => {
         })
         kLabel.add(kText)
 
-        const updateHandles = (link) => {
-            const startHandlePos = computeArrowIntersection(kNodes.getChildren()[link.from], kNodes.getChildren()[link.to])
-            const endHandlePos = computeArrowIntersection(kNodes.getChildren()[link.to], kNodes.getChildren()[link.from])
-            moveStartHandle(startHandlePos.x, startHandlePos.y)
-            moveEndHandle(endHandlePos.x, endHandlePos.y)
-            stage.batchDraw()
-        }
-        kNodes.getChildren()[link.from].on('dragmove', () => updateHandles(link));
-        kNodes.getChildren()[link.to].on('dragmove', () => updateHandles(link));
-
-        const moveStartHandle = (newX, newY) => {
-            kStartHandle.x(newX)
-            kStartHandle.y(newY)
-
-            // Mise à jour de la flèche
-            kArrow.points()[0] = newX
-            kArrow.points()[1] = newY
-
-            // Met à jour l'autre côté de la flèche
-            const end = computeArrowIntersectionFromPoints(kNodes.getChildren()[link.to], newX, newY)
-            kEndHandle.x(end.x)
-            kEndHandle.y(end.y)
-            kArrow.points()[2] = end.x
-            kArrow.points()[3] = end.y
-
-            // Mise à jour du label
-            const halfLabelWidth = kLabel.width() * .5
-            const halfLabelHeight = kLabel.height() * .5
-            kLabel.x((kStartHandle.x() + kEndHandle.x()) * .5 - halfLabelWidth)
-            kLabel.y((kStartHandle.y() + kEndHandle.y()) * .5 - halfLabelHeight)
-        }
-
-        const moveEndHandle = (newX, newY) => {
-            kEndHandle.x(newX)
-            kEndHandle.y(newY)
-
-            // Mise à jour de la flèche
-            kArrow.points()[2] = newX
-            kArrow.points()[3] = newY
-
-            // Met à jour l'autre côté de la flèche
-            const start = computeArrowIntersectionFromPoints(kNodes.getChildren()[link.from], newX, newY)
-            kStartHandle.x(start.x)
-            kStartHandle.y(start.y)
-            kArrow.points()[0] = start.x
-            kArrow.points()[1] = start.y
-
-            // Mise à jour du label
-            const halfLabelWidth = kLabel.width() * .5
-            const halfLabelHeight = kLabel.height() * .5
-            kLabel.x((kStartHandle.x() + kEndHandle.x()) * .5 - halfLabelWidth)
-            kLabel.y((kStartHandle.y() + kEndHandle.y()) * .5 - halfLabelHeight)
-        }
+        let graphicalLink = new GraphicalLink(link, kArrow, kLabel, kStartHandle, kEndHandle)
 
         const dragEndHandle = (isStartHandle) => {
-            let intersectedNode = null
-            let nodeIndex = -1
-            const kHandle = isStartHandle ? kStartHandle : kEndHandle
-            // Recherche du node sur lequel on est
-            // TODO: C'est très inefficace de devoir parcourir tous les nœuds
-            // ici.
-            const x = kHandle.x()
-            const y = kHandle.y()
-            for (let [kNodeIndex, kNode] of kNodes.getChildren().entries()) {
-                if (x >= kNode.x() && x < kNode.x() + kNode.width() &&
-                    y >= kNode.y() && y < kNode.y() + kNode.height()
-                ) {
-                    intersectedNode = kNode
-                    nodeIndex = kNodeIndex
-                }
-            }
+            // TODO: Est-ce qu'on veut prendre en paramètre l'événement de Konva
+            // ici ?
+            const pos = kStage.getPointerPosition()
+            const intersectedNode = kMainLayer.getIntersection(pos);
 
             if (intersectedNode) {
+                let oldNode
+                const nodeIndex = intersectedNode.index
                 // Si on a relié le début et la fin au même nœud, on inverse les liens,
                 // sinon on prend le nouveau nœud
                 if (intersectedNode === kNodes.getChildren()[link.to]) {
+                    oldNode = intersectedNode
                     // [handleFrom.intersectedNode, handleTo.intersectedNode] = [handleTo.intersectedNode, handleFrom.intersectedNode]
                 } else {
                     if (isStartHandle) {
+                        oldNode = kNodes.getChildren()[link.from]
                         link.from = nodeIndex
                     } else {
+                        oldNode = kNodes.getChildren()[link.to]
                         link.to = nodeIndex
                     }
                 }
+
+                if (isStartHandle) {
+                    for (let i = 0; i < nodesOutgoingLinks[oldNode.index].length; ++i) {
+                        if (nodesOutgoingLinks[oldNode.index][i] === graphicalLink) {
+                            nodesOutgoingLinks[oldNode.index].splice(i, 1)
+                            break
+                        }
+                    }
+                    nodesOutgoingLinks[nodeIndex].push(graphicalLink)
+                    kStartHandle.moveTo(kMainLayer)
+                } else {
+                    for (let i = 0; i < nodesIncomingLinks[oldNode.index].length; ++i) {
+                        if (nodesIncomingLinks[oldNode.index][i] === graphicalLink) {
+                            nodesIncomingLinks[oldNode.index].splice(i, 1)
+                            break
+                        }
+                    }
+                    nodesIncomingLinks[nodeIndex].push(graphicalLink)
+                    kEndHandle.moveTo(kMainLayer)
+                }
             }
-            // updateLinkPos(gLink)
-            updateHandles(link)
+
+            if (isStartHandle) {
+                kStartHandle.moveTo(kMainLayer)
+            } else {
+                kEndHandle.moveTo(kMainLayer)
+            }
+
+            graphicalLink.updateHandles(kNodes)
+            kMainLayer.batchDraw()
         }
 
         kStartHandle.on('dragend', () => dragEndHandle(true))
         kEndHandle.on('dragend', () => dragEndHandle(false))
 
-        kStartHandle.on('dragmove', () => {
-            moveStartHandle(kStartHandle.x(), kStartHandle.y())
+        kStartHandle.on('dragstart', () => {
+            kStartHandle.moveTo(kDragLayer)
         })
-        kEndHandle.on('dragmove', () => {
-            moveEndHandle(kEndHandle.x(), kEndHandle.y())
+        kEndHandle.on('dragstart', () => {
+            kEndHandle.moveTo(kDragLayer)
         })
 
-        // kStartHandle.on('dragstart', () => {
-        //     state.hotHandle = {
-        //         index: linkIndex,
-        //         isFrom: true,
-        //     }
-        // })
-        // kEndHandle.on('dragstart', () => {
-        //     state.hotHandle = {
-        //         index: linkIndex,
-        //         isFrom: false,
-        //     }
-        // })
+        kStartHandle.on('dragmove', () => {
+            graphicalLink.moveStartHandle(kNodes, kStartHandle.x(), kStartHandle.y())
+            kMainLayer.batchDraw()
+        })
+        kEndHandle.on('dragmove', () => {
+            graphicalLink.moveEndHandle(kNodes, kEndHandle.x(), kEndHandle.y())
+            kMainLayer.batchDraw()
+        })
 
         kLabel.on('dblclick', () => {
             konvaHandleTextInput(kText, newValue => {
@@ -287,52 +312,67 @@ window.addEventListener('DOMContentLoaded', () => {
         })
 
         // Position initiale
-        updateHandles(link)
+        graphicalLink.updateHandles(kNodes)
 
         kLinks.add(kLabel)
         kLinks.add(kArrow)
         kLinks.add(kStartHandle)
         kLinks.add(kEndHandle)
+        gLinks.push(graphicalLink)
     }
 
-    stage.add(kMainLayer)
-    stage.scale({ x: 1.5, y: 1.5 })
-    stage.draw()
+    for (const [nodeIndex] of map.nodes.entries()) {
+        nodesIncomingLinks.push([])
+        nodesOutgoingLinks.push([])
 
-    stage.on('wheel', e => {
+        for (const gLink of gLinks) {
+            if (gLink.link.from === nodeIndex) {
+                nodesOutgoingLinks[nodeIndex].push(gLink)
+            } else if (gLink.link.to === nodeIndex) {
+                nodesIncomingLinks[nodeIndex].push(gLink)
+            }
+        }
+    }
+
+    kStage.add(kMainLayer)
+    kStage.add(kDragLayer)
+    kStage.scale({ x: 1.5, y: 1.5 })
+    kStage.draw()
+
+    kStage.on('wheel', e => {
         e.evt.preventDefault()
-        let oldScale = stage.scaleX()
-        let mousePos = stage.getPointerPosition()
+        let oldScale = kStage.scaleX()
+        let mousePos = kStage.getPointerPosition()
 
         let mousePointTo = {
-            x: (mousePos.x - stage.x()) / oldScale,
-            y: (mousePos.y - stage.y()) / oldScale,
+            x: (mousePos.x - kStage.x()) / oldScale,
+            y: (mousePos.y - kStage.y()) / oldScale,
         }
         let newScale = e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED
 
-        stage.scale({ x: newScale, y: newScale })
+        kStage.scale({ x: newScale, y: newScale })
 
         let newPos = {
             x: mousePos.x - mousePointTo.x * newScale,
             y: mousePos.y - mousePointTo.y * newScale,
         }
-        stage.position(newPos)
-        stage.batchDraw()
+        kStage.position(newPos)
+        kStage.batchDraw()
     })
 
     window.addEventListener('resize', () => {
         const containerWidth = stageContainerElt.offsetWidth
         const containerHeight = stageContainerElt.offsetHeight
-        stage.width(containerWidth)
-        stage.height(containerHeight)
-        stage.batchDraw()
+        kStage.width(containerWidth)
+        kStage.height(containerHeight)
+        kStage.batchDraw()
     })
 })
 
 function konvaHandleTextInput(kText, onInput, bold = false) {
     // Inspiré de https://konvajs.org/docs/sandbox/Editable_Text.html
 
-    let stage = kText.getStage()
+    let kStage = kText.getStage()
     let layer = kText.getLayer()
 
     kText.hide()
@@ -342,11 +382,11 @@ function konvaHandleTextInput(kText, onInput, bold = false) {
     // first we need to find position for textarea
     // how to find it?
 
-    // at first lets find position of text node relative to the stage:
+    // at first lets find position of text node relative to the kStage:
     let textPosition = kText.absolutePosition()
 
-    // then lets find position of stage container on the page:
-    let stageBox = stage.container().getBoundingClientRect()
+    // then lets find position of kStage container on the page:
+    let stageBox = kStage.container().getBoundingClientRect()
 
     // so position of textarea will be the sum of positions above:
     let areaPosition = {
@@ -358,7 +398,7 @@ function konvaHandleTextInput(kText, onInput, bold = false) {
     let textarea = document.createElement('textarea')
     document.body.appendChild(textarea)
 
-    const scale = stage.scale().x
+    const scale = kStage.scale().x
     const originalValue = kText.text()
 
     // apply many styles to match text on canvas as close as possible
