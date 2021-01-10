@@ -243,21 +243,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (intersectedKNode) {
                 let oldNode
-                const nodeIndex = intersectedKNode.index
+                const intersectedNodeIndex = intersectedKNode.index
+                if (isStartHandle) {
+                    oldNode = gNodes[link.from].kNode
+                    link.from = intersectedNodeIndex
+                } else {
+                    oldNode = gNodes[link.to].kNode
+                    link.to = intersectedNodeIndex
+                }
                 // Si on a relié le début et la fin au même nœud, on inverse les liens,
                 // sinon on prend le nouveau nœud
-                if (intersectedKNode === gNodes[link.to].kNode) {
-                    oldNode = intersectedKNode
-                    // [handleFrom.intersectedNode, handleTo.intersectedNode] = [handleTo.intersectedNode, handleFrom.intersectedNode]
-                } else {
-                    if (isStartHandle) {
-                        oldNode = gNodes[link.from].kNode
-                        link.from = nodeIndex
-                    } else {
-                        oldNode = gNodes[link.to].kNode
-                        link.to = nodeIndex
-                    }
-                }
+                // if (intersectedKNode === gNodes[link.to].kNode) {
+                //     [link.from, link.to] = [link.to, link.from]
+                // }
 
                 // On met à jour les liens entrants et sortants de l'ancien
                 // nœud et du nouveau nœud intersecté
@@ -268,8 +266,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             break
                         }
                     }
-                    gNodes[nodeIndex].outGLinks.push(graphicalLink)
-                    kStartHandle.moveTo(kMainLayer)
+                    gNodes[intersectedNodeIndex].outGLinks.push(graphicalLink)
                 } else {
                     for (let i = 0; i < gNodes[oldNode.index].inGLinks.length; ++i) {
                         if (gNodes[oldNode.index].inGLinks[i] === graphicalLink) {
@@ -277,8 +274,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             break
                         }
                     }
-                    gNodes[nodeIndex].inGLinks.push(graphicalLink)
-                    kEndHandle.moveTo(kMainLayer)
+                    gNodes[intersectedNodeIndex].inGLinks.push(graphicalLink)
                 }
             }
 
