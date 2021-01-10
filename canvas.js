@@ -2,28 +2,90 @@ let mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"
 
 const NODE_LABEL_OFFSETX = 20
 const NODE_LABEL_OFFSETY = 20
-const ZOOM_SPEED = 1.05
 const LINK_HANDLE_RADIUS = 10
+const ZOOM_SPEED = 1.05
 
-/**
- * Calcule la position du point de départ/d'arrivée de la flèche entre les deux
- * nœuds.
- *
- * @param {GraphicalNode} startGNode - Le nœud de départ.
- * @param {GraphicalNode} endGNode - Le nœud d'arrivée.
- * @return {{x: number, y: number}} La position de départ/d'arrivée de la flèche.
- */
-function computeArrowIntersection(startGNode, endGNode) {
-    let startX = startGNode.x + startGNode.width * .5
-    let startY = startGNode.y + startGNode.height * .5
-    let endX = endGNode.x + endGNode.width * .5
-    let endY = endGNode.y + endGNode.height * .5
+class GraphicalNode {
+    constructor(node, kNode) {
+        this.node = node
+        this.kNode = kNode
+        this.inGLinks = []
+        this.outGLinks = []
+    }
+}
+
+class GraphicalLink {
+    constructor(link, kArrow, kLabel, kStartHandle, kEndHandle) {
+        this.link = link
+        this.kArrow = kArrow
+        this.kLabel = kLabel
+        this.kStartHandle = kStartHandle
+        this.kEndHandle = kEndHandle
+    }
+
+    updateHandles(gNodes) {
+        const startHandlePos = computeArrowIntersection(gNodes[this.link.from].kNode, gNodes[this.link.to].kNode)
+        const endHandlePos = computeArrowIntersection(gNodes[this.link.to].kNode, gNodes[this.link.from].kNode)
+        // TODO: On vient de calculer le point d'intersection, mais on va le
+        // recalculer dans `moveStartHandle` et `moveEndHandle` !
+        this.moveStartHandle(gNodes, startHandlePos.x, startHandlePos.y)
+        this.moveEndHandle(gNodes, endHandlePos.x, endHandlePos.y)
+    }
+
+    moveStartHandle(gNodes, newX, newY) {
+        this.kStartHandle.x(newX)
+        this.kStartHandle.y(newY)
+
+        // Mise à jour de la flèche
+        this.kArrow.points()[0] = newX
+        this.kArrow.points()[1] = newY
+
+        // Mise à jour du label
+        const halfLabelWidth = this.kLabel.width() * .5
+        const halfLabelHeight = this.kLabel.height() * .5
+        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
+        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
+
+        // Met à jour l'autre côté de la flèche
+        const end = computeArrowIntersectionFromPoints(gNodes[this.link.to].kNode, newX, newY)
+        this.kEndHandle.x(end.x)
+        this.kEndHandle.y(end.y)
+        this.kArrow.points()[2] = end.x
+        this.kArrow.points()[3] = end.y
+    }
+
+    moveEndHandle(gNodes, newX, newY) {
+        this.kEndHandle.x(newX)
+        this.kEndHandle.y(newY)
+
+        // Mise à jour de la flèche
+        this.kArrow.points()[2] = newX
+        this.kArrow.points()[3] = newY
+
+        // Mise à jour du label
+        const halfLabelWidth = this.kLabel.width() * .5
+        const halfLabelHeight = this.kLabel.height() * .5
+        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
+        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
+
+        // Met à jour l'autre côté de la flèche
+        const start = computeArrowIntersectionFromPoints(gNodes[this.link.from].kNode, newX, newY)
+        this.kStartHandle.x(start.x)
+        this.kStartHandle.y(start.y)
+        this.kArrow.points()[0] = start.x
+        this.kArrow.points()[1] = start.y
+    }
+}
+
+function computeArrowIntersectionFromPoints(kStartNode, endX, endY) {
+    let startX = kStartNode.x() + kStartNode.width() * .5
+    let startY = kStartNode.y() + kStartNode.height() * .5
     let dx = endX - startX
     let dy = endY - startY
-    let tTop = (startGNode.y - startY) / dy
-    let tBottom = (startGNode.y + startGNode.height - startY) / dy
-    let tRight = (startGNode.x + startGNode.width - startX) / dx
-    let tLeft = (startGNode.x - startX) / dx
+    let tTop = (kStartNode.y() - startY) / dy
+    let tBottom = (kStartNode.y() + kStartNode.height() - startY) / dy
+    let tRight = (kStartNode.x() + kStartNode.width() - startX) / dx
+    let tLeft = (kStartNode.x() - startX) / dx
     let tCandidates = []
     if (tTop >= 0) tCandidates.push(tTop)
     if (tBottom >= 0) tCandidates.push(tBottom)
@@ -37,525 +99,281 @@ function computeArrowIntersection(startGNode, endGNode) {
     }
 }
 
-/**
- * Met à jour la position des liens.
- *
- * @param {GraphicalLink[]} gLinks - Les liens.
- * @param {number} nodeIndex - L'indice du nœud pour lequel on met à jour les
- *      liens (si `null`, on met à jour toutes les liens).
- */
-function updateLinksPos(gLinks, nodeIndex = null) {
-    for (let gLink of gLinks) {
-        if (nodeIndex === null ||
-            nodeIndex !== null &&
-            (nodeIndex === gLink.handleFrom.gNode.index ||
-             nodeIndex === gLink.handleTo.gNode.index)
-        ) {
-            updateLinkPos(gLink)
-        }
-    }
-}
+function computeArrowIntersection(kStartNode, kEndNode) {
+    let endX = kEndNode.x() + kEndNode.width() * .5
+    let endY = kEndNode.y() + kEndNode.height() * .5
 
-function updateLinkPos(gLink) {
-    const startNode = gLink.handleFrom.gNode
-    const endNode = gLink.handleTo.gNode
-    const start = computeArrowIntersection(startNode, endNode)
-    const end = computeArrowIntersection(endNode, startNode)
-    gLink.handleFrom.x = start.x
-    gLink.handleFrom.y = start.y
-    gLink.handleTo.x = end.x
-    gLink.handleTo.y = end.y
-}
-
-class GraphicalObject {
-    constructor() {
-        this._changeCallbacks = []
-        this._eventsCallbacks = []
-    }
-
-    /**
-     * Ajoute une propriété.
-     *
-     * @param {*} property - La propriété à ajouter.
-     * @param {*} initialValue - La valeur initiale de la propriété.
-     */
-    addProperty(property, initialValue = null) {
-        const internalProperty = '_' + property
-        this[internalProperty] = initialValue
-
-        Object.defineProperty(this, property, {
-            get: () => this[internalProperty],
-            set: value => {
-                if (this[internalProperty] !== value) {
-                    this[internalProperty] = value
-                    if (this._changeCallbacks[property]) {
-                        for (let cb of this._changeCallbacks[property]) {
-                            cb(value)
-                        }
-                    }
-                }
-            }
-        })
-    }
-
-    /**
-     * Ajoute une fonction callback appelée lorsqu'une propriété change.
-     *
-     * @param {string} properties - Les propriétés à observer, séparées par des
-     *      espaces.
-     * @param {*} callback - La fonction callback prenant en paramètre la
-     *      nouvelle valeur.
-     */
-    onChange(properties, callback) {
-        for (const property of properties.split(' ')) {
-            if (!this._changeCallbacks[property]) {
-                this._changeCallbacks[property] = []
-            }
-            this._changeCallbacks[property].push(callback)
-        }
-    }
-
-    on(event, callback) {
-        if (!this._eventsCallbacks[event]) {
-            this._eventsCallbacks[event] = []
-        }
-        this._eventsCallbacks[event].push(callback)
-    }
-
-    /**
-     * Déclenche l'événement demandé. Tous les callbacks pour cet événement
-     * seront notifié et recevront les infos associées.
-     *
-     * @param {string} event - Le nom de l'événement
-     * @param {*} eventInfos - Les infos associées à l'événement
-     */
-    fire(event, eventInfos = {}) {
-        if (!this._eventsCallbacks[event]) {
-            console.error('Trying to call an unregistered event callback')
-        } else {
-            for (let cb of this._eventsCallbacks[event]) {
-                cb(eventInfos)
-            }
-        }
-    }
-}
-
-class Label extends GraphicalObject {
-    constructor(text, x = 0, y = 0, width = 0, height = 0) {
-        super()
-        this.addProperty('text', text)
-        this.addProperty('x', x)
-        this.addProperty('y', y)
-        this.addProperty('width', width)
-        this.addProperty('height', height)
-
-        this.on('input', ({ newValue, newWidth, newHeight }) => {
-            this.text = newValue
-            this.width = newWidth
-            this.height = newHeight
-        })
-    }
-}
-
-class LinkHandle extends GraphicalObject {
-    constructor(gNode) {
-        super()
-        this.addProperty('x')
-        this.addProperty('y')
-        this.addProperty('gNode', gNode)
-        this.addProperty('radius', LINK_HANDLE_RADIUS)
-
-        this.on('dragmove', ({ x, y }) => {
-            this.x = x
-            this.y = y
-        })
-    }
-}
-
-class GraphicalNode extends GraphicalObject {
-    constructor(node, index) {
-        super()
-        this.index = index
-        this.addProperty('x', node.x)
-        this.addProperty('y', node.y)
-        this.addProperty('label', new Label(node.name))
-        this.addProperty('width')
-        this.addProperty('height')
-
-        this.on('dragmove', ({ x, y }) => {
-            this.x = x
-            this.y = y
-        })
-
-        // Mise à jour du nom quand le label change
-        this.label.onChange('text', newValue => {
-            node.name = newValue
-        })
-
-        // Mise à jour de la taille quand la taille du label change
-        this.label.onChange('width', newWidth => {
-            this.width = newWidth + NODE_LABEL_OFFSETX
-            this.label.x = node.x + this.width * .5 - this.label.width * .5
-        })
-        this.label.onChange('height', newHeight => {
-            this.height = newHeight + NODE_LABEL_OFFSETY
-            this.label.y = node.y + this.height * .5 - this.label.height * .5
-        })
-
-        // Mise à jour du label quand le node bouge
-        this.onChange('x', newX => {
-            node.x = newX
-            this.label.x = newX + this.width * .5 - this.label.width * .5
-        })
-        this.onChange('y', newY => {
-            node.y = newY
-            this.label.y = newY + this.height * .5 - this.label.height * .5
-        })
-    }
-}
-
-class GraphicalLink extends GraphicalObject {
-    constructor(link, gNodeFrom, gNodeTo) {
-        super()
-        this.addProperty('handleFrom', new LinkHandle(gNodeFrom))
-        this.addProperty('handleTo', new LinkHandle(gNodeTo))
-        this.addProperty('label', new Label(link.verb))
-
-        this.handleFrom.onChange('gNode', newGNodeFrom => {
-            link.from = newGNodeFrom.index
-            updateLinkPos(this)
-        })
-        this.handleTo.onChange('gNode', newGNodeTo => {
-            link.to = newGNodeTo.index
-            updateLinkPos(this)
-        })
-        // Mise à jour du verbe quand le label change
-        this.label.onChange('text', newVerb => {
-            link.verb = newVerb
-        })
-
-        // Mise à jour des points quand les handles bougent (c'est-à-dire quand
-        // on déplace la flèche)
-        this.handleFrom.onChange('x y', this._replaceLabel.bind(this))
-        this.handleTo.onChange('x y', this._replaceLabel.bind(this))
-
-        // Mise à jour de la position du label quand le verbe change
-        this.label.onChange('width height', () => this._replaceLabel())
-    }
-
-    _replaceLabel() {
-        const halfLabelWidth = this.label.width * .5
-        const halfLabelHeight = this.label.height * .5
-        this.label.x = (this.handleFrom.x + this.handleTo.x) * .5 - halfLabelWidth
-        this.label.y = (this.handleFrom.y + this.handleTo.y) * .5 - halfLabelHeight
-    }
-}
-
-function findIntersectedNode(linkHandle, gNodes) {
-    const x = linkHandle.x
-    const y = linkHandle.y
-    for (let nodeIndex = 0; nodeIndex < gNodes.length; ++nodeIndex) {
-        const gNode = gNodes[nodeIndex]
-        if (x >= gNode.x && x < gNode.x + gNode.width &&
-            y >= gNode.y && y < gNode.y + gNode.height
-        ) {
-            return gNode
-        }
-    }
-
-    return null
+    return computeArrowIntersectionFromPoints(kStartNode, endX, endY)
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     let map = JSON.parse(mapJSON)
 
-    //
-    // Création des éléments graphiques
-    //
+    let kMainLayer = new Konva.Layer()
+    let kDragLayer = new Konva.Layer()
+
     let gLinks = []
     let gNodes = []
-    for (let nodeIndex = 0; nodeIndex < map.nodes.length; ++nodeIndex) {
-        const node = map.nodes[nodeIndex]
-        let gNode = new GraphicalNode(node, nodeIndex)
-        gNode.on('dragmove', () => {
-            updateLinksPos(gLinks, nodeIndex)
-        })
-        gNodes.push(gNode)
-    }
 
-    const updateHandleNode = (gLink, handleFrom, handleTo) => {
-        const gNode = findIntersectedNode(handleFrom, gNodes)
-        if (gNode) {
-            // Si on a relié le début et la fin au même nœud, on inverse les liens, sinon
-            // on prend le nouveau nœud
-            if (gNode === handleTo.gNode) {
-                [handleFrom.gNode, handleTo.gNode] = [handleTo.gNode, handleFrom.gNode]
-            } else {
-                handleFrom.gNode = gNode
-            }
-        }
-        updateLinkPos(gLink)
-    }
+    // Les `kNodes` sont des `Konva.Rect`. On les met dans un groupe à part car
+    // quand on récupère le rectangle intersecté, on a besoin de l'indice qui
+    // sert à récupérer le `GraphicalNode` dans `gNodes`.
+    // TODO: Faire mieux que ça ?
+    let kNodes = new Konva.Group()
+    kMainLayer.add(kNodes)
 
-    for (let link of map.links) {
-        let gLink = new GraphicalLink(link, gNodes[link.from], gNodes[link.to])
-        gLink.handleFrom.on('dragend', () => {
-            updateHandleNode(gLink, gLink.handleFrom, gLink.handleTo)
-        })
-        gLink.handleTo.on('dragend', () => {
-            updateHandleNode(gLink, gLink.handleTo, gLink.handleFrom)
-        })
-        gLinks.push(gLink)
-    }
-
-    //
-    // À partir d'ici, le code est dépendant de la bibliothèque d'affichage.
-    //
     let stageContainerElt = document.getElementById('canvas-container')
-    let stage = new Konva.Stage({
+    let kStage = new Konva.Stage({
         container: 'canvas-container',
         width: stageContainerElt.offsetWidth,
         height: stageContainerElt.offsetHeight,
-        draggable: true
+        draggable: true,
     })
 
-    let kLabels = new Konva.Group()
+    for (let [nodeIndex, node] of map.nodes.entries()) {
+        let kNode = new Konva.Rect({
+            x: node.x,
+            y: node.y,
+            fill: '#d9e1f3',
+            stroke: 'blue',
+            strokeEnabled: false,
+            cornerRadius: 4,
+        })
 
-    let mainLayer = new Konva.Layer()
+        let gNode = new GraphicalNode(node, kNode)
 
-    // Links
-    let kArrows = new Konva.Group()
-    for (let gLinkIndex = 0; gLinkIndex < gLinks.length; ++gLinkIndex) {
-        let gLink = gLinks[gLinkIndex]
+        let kLabel = new Konva.Label()
+        let kText = new Konva.Text({
+            text: node.name,
+            fontFamily: 'Quicksand',
+            fontStyle: 'bold',
+            listening: false
+        })
+        kLabel.add(kText)
+
+        // Mise à jour des flèches reliées à ce nœud
+        const updateLinks = () => {
+            for (let gLink of gNode.outGLinks) {
+                gLink.updateHandles(gNodes)
+            }
+            for (let gLink of gNode.inGLinks) {
+                gLink.updateHandles(gNodes)
+            }
+            kMainLayer.batchDraw()
+        }
+
+        // Taille initiale du node
+        kNode.width(kLabel.width() + NODE_LABEL_OFFSETX)
+        kNode.height(kLabel.height() + NODE_LABEL_OFFSETY)
+        // Placement initial du label
+        kLabel.x(kNode.x() + kNode.width() * .5 - kLabel.width() * .5)
+        kLabel.y(kNode.y() + kNode.height() * .5 - kLabel.height() * .5)
+
+        kNode.on('dblclick', () => {
+            konvaHandleTextInput(kText, newValue => {
+                node.name = newValue
+                kNode.width(kLabel.width() + NODE_LABEL_OFFSETX)
+                kNode.height(kLabel.height() + NODE_LABEL_OFFSETY)
+                updateLinks()
+            }, true)
+        })
+
+        kNode.on('dragmove', () => {
+            const newX = kNode.x()
+            const newY = kNode.y()
+            node.x = newX
+            node.y = newY
+
+            kLabel.x(newX + kNode.width() * .5 - kLabel.width() * .5)
+            kLabel.y(newY + kNode.height() * .5 - kLabel.height() * .5)
+            updateLinks()
+        })
+
+        kNode.on('mousedown', () => {
+            kNode.startDrag()
+        })
+        kNode.on('mouseup', () => {
+            kNode.stopDrag()
+        })
+
+        kNodes.add(kNode)
+        kMainLayer.add(kLabel)
+        gNodes.push(gNode)
+    }
+
+    for (let [linkIndex, link] of map.links.entries()) {
+        let kStartHandle = new Konva.Circle({
+            radius: LINK_HANDLE_RADIUS,
+            // fill: 'red',
+            draggable: true,
+        })
+        let kEndHandle = new Konva.Circle({
+            radius: LINK_HANDLE_RADIUS,
+            // fill: 'blue',
+            draggable: true,
+        })
+
         let kArrow = new Konva.Arrow({
             fill: '#4e6ea5',
             stroke: '#4e6ea5',
             lineCap: 'round',
             pointerWidth: 10,
             pointerLength: 8,
-            points: [
-                gLink.handleFrom.x,
-                gLink.handleFrom.y,
-                gLink.handleTo.x,
-                gLink.handleTo.y
-            ]
+            listening: false,
+            points: [0, 0, 0, 0]
         })
+
         let kLabel = new Konva.Label()
         kLabel.add(new Konva.Tag({
             fill: '#ffffffaa',
             cornerRadius: 2
         }))
         let kText = new Konva.Text({
-            text: gLink.label.text,
+            text: link.verb,
             padding: 2,
             fontFamily: 'Quicksand'
         })
         kLabel.add(kText)
 
-        let kStartHandle = new Konva.Circle({
-            x: gLink.handleFrom.x,
-            y: gLink.handleFrom.y,
-            radius: gLink.handleFrom.radius,
-            draggable: true,
+        let graphicalLink = new GraphicalLink(link, kArrow, kLabel, kStartHandle, kEndHandle)
+
+        const dragEndHandle = (isStartHandle) => {
+            const pos = kStage.getPointerPosition()
+            const intersectedKNode = kMainLayer.getIntersection(pos);
+
+            if (intersectedKNode) {
+                let oldNode
+                const intersectedNodeIndex = intersectedKNode.index
+                if (isStartHandle) {
+                    oldNode = gNodes[link.from].kNode
+                    link.from = intersectedNodeIndex
+                } else {
+                    oldNode = gNodes[link.to].kNode
+                    link.to = intersectedNodeIndex
+                }
+                // Si on a relié le début et la fin au même nœud, on inverse les liens,
+                // sinon on prend le nouveau nœud
+                // if (intersectedKNode === gNodes[link.to].kNode) {
+                //     [link.from, link.to] = [link.to, link.from]
+                // }
+
+                // On met à jour les liens entrants et sortants de l'ancien
+                // nœud et du nouveau nœud intersecté
+                if (isStartHandle) {
+                    for (let i = 0; i < gNodes[oldNode.index].outGLinks.length; ++i) {
+                        if (gNodes[oldNode.index].outGLinks[i] === graphicalLink) {
+                            gNodes[oldNode.index].outGLinks.splice(i, 1)
+                            break
+                        }
+                    }
+                    gNodes[intersectedNodeIndex].outGLinks.push(graphicalLink)
+                } else {
+                    for (let i = 0; i < gNodes[oldNode.index].inGLinks.length; ++i) {
+                        if (gNodes[oldNode.index].inGLinks[i] === graphicalLink) {
+                            gNodes[oldNode.index].inGLinks.splice(i, 1)
+                            break
+                        }
+                    }
+                    gNodes[intersectedNodeIndex].inGLinks.push(graphicalLink)
+                }
+            }
+
+            if (isStartHandle) {
+                kStartHandle.moveTo(kMainLayer)
+            } else {
+                kEndHandle.moveTo(kMainLayer)
+            }
+
+            graphicalLink.updateHandles(gNodes)
+            kMainLayer.batchDraw()
+        }
+
+        kStartHandle.on('dragend', () => dragEndHandle(true))
+        kEndHandle.on('dragend', () => dragEndHandle(false))
+
+        kStartHandle.on('dragstart', () => {
+            kStartHandle.moveTo(kDragLayer)
         })
-        let kEndHandle = new Konva.Circle({
-            x: gLink.handleTo.x,
-            y: gLink.handleTo.y,
-            radius: gLink.handleTo.radius,
-            draggable: true,
+        kEndHandle.on('dragstart', () => {
+            kEndHandle.moveTo(kDragLayer)
         })
-        kLabels.add(kStartHandle)
-        kLabels.add(kEndHandle)
 
         kStartHandle.on('dragmove', () => {
-            gLink.handleFrom.fire('dragmove', {
-                x: kStartHandle.x(),
-                y: kStartHandle.y(),
-            })
+            graphicalLink.moveStartHandle(gNodes, kStartHandle.x(), kStartHandle.y())
+            kMainLayer.batchDraw()
         })
         kEndHandle.on('dragmove', () => {
-            gLink.handleTo.fire('dragmove', {
-                x: kEndHandle.x(),
-                y: kEndHandle.y(),
-            })
+            graphicalLink.moveEndHandle(gNodes, kEndHandle.x(), kEndHandle.y())
+            kMainLayer.batchDraw()
         })
-        kStartHandle.on('dragend', () => {
-            gLink.handleFrom.fire('dragend')
-            mainLayer.draw()
-        })
-        kEndHandle.on('dragend', () => {
-            gLink.handleTo.fire('dragend')
-            mainLayer.draw()
-        })
-
-        // On met à jour la flèche de Konva quand notre flèche change
-        gLink.handleFrom.onChange('x', newX => {
-            kArrow.points()[0] = newX
-        })
-        gLink.handleFrom.onChange('y', newY => {
-            kArrow.points()[1] = newY
-        })
-        gLink.handleTo.onChange('x', newX => {
-            kArrow.points()[2] = newX
-        })
-        gLink.handleTo.onChange('y', newY => {
-            kArrow.points()[3] = newY
-        })
-
-        // On met à jour les handles quand nos handles bougent
-        for (const property of ['x', 'y']) {
-            gLink.handleFrom.onChange(property, newValue => {
-                kStartHandle[property](newValue)
-            })
-            gLink.handleTo.onChange(property, newValue => {
-                kEndHandle[property](newValue)
-            })
-        }
-
-        // On met à jour le label de Konva quand notre label change
-        for (const property of ['x', 'y', 'width', 'height']) {
-            gLink.label.onChange(property, newValue => {
-                kLabel[property](newValue)
-            })
-        }
-        gLink.label.onChange('text', newValue => {
-            kText.text(newValue)
-        })
-
-        gLink.label.width = kLabel.width()
-        gLink.label.height = kLabel.height()
 
         kLabel.on('dblclick', () => {
             konvaHandleTextInput(kText, newValue => {
-                gLink.label.fire('input', {
-                    newValue,
-                    newWidth: kLabel.width(),
-                    newHeight: kLabel.height(),
-                })
+                link.verb = newValue
+                graphicalLink.updateHandles(gNodes)
+                kMainLayer.batchDraw()
             })
         })
 
-        kLabels.add(kLabel)
-        kArrows.add(kArrow)
+        // Position initiale
+        graphicalLink.updateHandles(gNodes)
+
+        kMainLayer.add(kArrow)
+        kMainLayer.add(kLabel)
+        kMainLayer.add(kStartHandle)
+        kMainLayer.add(kEndHandle)
+        gLinks.push(graphicalLink)
     }
 
-    // Nodes
-    let kNodes = new Konva.Group()
-    for (let gNodeIndex = 0; gNodeIndex < gNodes.length; ++gNodeIndex) {
-        let gNode = gNodes[gNodeIndex]
-
-        let kNode = new Konva.Rect({
-            x: gNode.x,
-            y: gNode.y,
-            fill: '#d9e1f3',
-            stroke: 'blue',
-            strokeEnabled: false,
-            cornerRadius: 4,
-            draggable: true
-        })
-        kNodes.add(kNode)
-
-        // On met à jour le Konva.Rect quand notre node graphique change
-        for (let property of ['x', 'y', 'width', 'height']) {
-            gNode.onChange(property, newValue => {
-                kNode[property](newValue)
-            })
+    for (let [gNodeIndex, gNode] of gNodes.entries()) {
+        for (const gLink of gLinks) {
+            if (gLink.link.from === gNodeIndex) {
+                gNode.outGLinks.push(gLink)
+            } else if (gLink.link.to === gNodeIndex) {
+                gNode.inGLinks.push(gLink)
+            }
         }
-
-        let kLabel = new Konva.Label()
-        let kText = new Konva.Text({
-            text: gNode.label.text,
-            fontFamily: 'Quicksand',
-            fontStyle: 'bold',
-            listening: false
-        })
-        kLabel.add(kText)
-        kLabels.add(kLabel)
-
-        // On met à jour le label de Konva quand notre label change
-        for (let property of ['x', 'y', 'width', 'height']) {
-            gNode.label.onChange(property, newValue => {
-                kLabel[property](newValue)
-            })
-        }
-        gNode.label.onChange('text', newValue => {
-            kText.text(newValue)
-        })
-
-        gNode.label.width = kLabel.width()
-        gNode.label.height = kLabel.height()
-
-        kNode.on('dblclick', () => {
-            konvaHandleTextInput(kText, newValue => {
-                gNode.label.fire('input', {
-                    newValue,
-                    newWidth: kLabel.width(),
-                    newHeight: kLabel.height(),
-                })
-                updateLinksPos(gLinks, gNodeIndex)
-            }, true)
-        })
-
-        kNode.on('dragmove', () => {
-            gNode.fire('dragmove', {
-                x: kNode.x(),
-                y: kNode.y(),
-            })
-        })
     }
 
-    updateLinksPos(gLinks)
+    kStage.add(kMainLayer)
+    kStage.add(kDragLayer)
+    kStage.scale({ x: 1.5, y: 1.5 })
+    kStage.draw()
 
-    mainLayer.add(kNodes)
-    mainLayer.add(kArrows)
-    mainLayer.add(kLabels)
-
-    stage.add(mainLayer)
-    stage.scale({ x: 1.5, y: 1.5 })
-    stage.draw()
-
-    stage.on('wheel', e => {
+    kStage.on('wheel', e => {
         e.evt.preventDefault()
-        let oldScale = stage.scaleX()
-        let mousePos = stage.getPointerPosition()
+        let oldScale = kStage.scaleX()
+        let mousePos = kStage.getPointerPosition()
 
         let mousePointTo = {
-            x: (mousePos.x - stage.x()) / oldScale,
-            y: (mousePos.y - stage.y()) / oldScale,
+            x: (mousePos.x - kStage.x()) / oldScale,
+            y: (mousePos.y - kStage.y()) / oldScale,
         }
         let newScale = e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED
 
-        stage.scale({ x: newScale, y: newScale })
+        kStage.scale({ x: newScale, y: newScale })
 
         let newPos = {
             x: mousePos.x - mousePointTo.x * newScale,
             y: mousePos.y - mousePointTo.y * newScale,
         }
-        stage.position(newPos)
-        stage.batchDraw()
+        kStage.position(newPos)
+        kStage.batchDraw()
     })
-
-    // Export button
-    // let exportBtnElt = document.getElementById('export-btn')
-    // let exportedElt = document.getElementById('exported')
-    // exportBtnElt.addEventListener('click', e => {
-    //     let mapJson = JSON.stringify(map)
-    //     exportedElt.textContent = mapJson
-    // })
 
     window.addEventListener('resize', () => {
         const containerWidth = stageContainerElt.offsetWidth
         const containerHeight = stageContainerElt.offsetHeight
-        stage.width(containerWidth)
-        stage.height(containerHeight)
-        stage.batchDraw()
+        kStage.width(containerWidth)
+        kStage.height(containerHeight)
+        kStage.batchDraw()
     })
 })
 
 function konvaHandleTextInput(kText, onInput, bold = false) {
     // Inspiré de https://konvajs.org/docs/sandbox/Editable_Text.html
 
-    let stage = kText.getStage()
+    let kStage = kText.getStage()
     let layer = kText.getLayer()
 
     kText.hide()
@@ -565,11 +383,11 @@ function konvaHandleTextInput(kText, onInput, bold = false) {
     // first we need to find position for textarea
     // how to find it?
 
-    // at first lets find position of text node relative to the stage:
+    // at first lets find position of text node relative to the kStage:
     let textPosition = kText.absolutePosition()
 
-    // then lets find position of stage container on the page:
-    let stageBox = stage.container().getBoundingClientRect()
+    // then lets find position of kStage container on the page:
+    let stageBox = kStage.container().getBoundingClientRect()
 
     // so position of textarea will be the sum of positions above:
     let areaPosition = {
@@ -581,7 +399,7 @@ function konvaHandleTextInput(kText, onInput, bold = false) {
     let textarea = document.createElement('textarea')
     document.body.appendChild(textarea)
 
-    const scale = stage.scale().x
+    const scale = kStage.scale().x
     const originalValue = kText.text()
 
     // apply many styles to match text on canvas as close as possible
