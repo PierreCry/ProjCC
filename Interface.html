@@ -48,8 +48,10 @@
     </div>
 
     <!-- Tabs -->
-    <div class="tab">
-        <button class="t5 tablinks" onclick="openCity(event, '1')" id="defaultOpen">Projet 1<close onclick="New()">&times;</close></button>
+    <div class="tab" id="theTab">
+        <button class="t5 tablinks" onclick="openCity(event, '1')" id="t1">Projet 1
+            <close id="c1" onClick="reply_click(this.id)">&times;</close>
+        </button>
     </div>
 
     <div class="content"></div>
@@ -88,7 +90,7 @@
 
     <script>
         // Get the element with id="defaultOpen" and click on it
-        document.getElementById("defaultOpen").click();
+        document.getElementById("t1").click();
     </script>
 
 </body>

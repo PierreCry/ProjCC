@@ -18,7 +18,7 @@ function New() {
 
     nb_fen++;
 
-    var tab = '<button class="t5 tablinks" onclick="openCity(event,'+ nb_fen + ')">Projet ' + nb_fen + '<close onclick="New()">&times;</close></button>';
+    var tab = '<button class="t5 tablinks" onclick="openCity(event,'+ nb_fen + ')" id="t'+ nb_fen +'">Projet ' + nb_fen + '<close id="c'+ nb_fen +'" onClick="reply_click(this.id)">&times;</close></button>';
 
     $(".tab").append(
         tab
@@ -55,6 +55,8 @@ function New() {
         '</div>'
     );
 
+    var tabid = 't'.concat(nb_fen);
+    document.getElementById(tabid).click();
 }
 
 function openNav() {
@@ -63,4 +65,13 @@ function openNav() {
 
 function closeNav() {
     document.getElementById("myNav").style.width = "0%";
+}
+
+function reply_click(clicked_id){
+    var tabbuttonid = 't'.concat(clicked_id.substr(1));
+    var tabid = 'P'.concat(clicked_id.substr(1));
+    var tabbutton = document.getElementById(tabbuttonid);
+    var tab = document.getElementById(tabid);
+    tabbutton.remove(tabbutton);
+    tab.remove(tab);
 }
