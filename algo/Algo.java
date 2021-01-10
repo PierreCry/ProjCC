@@ -1,6 +1,4 @@
 public class Algo {
-	private static Map mymap;
-	
 	private static LabelList correctLabels, wrongLabels;
 	private static LinkList correctLinks, wrongLinks;
 	
@@ -13,7 +11,7 @@ public class Algo {
 	private static int missingWordCounter;
 	
 	public static void main(String[] args) {
-		mymap = new Map();
+		Map mymap = new Map();
 		wrongLabelCounter = 0;
 		wrongLinkCounter = 0;
 		missingWordCounter = 0;
@@ -49,9 +47,6 @@ public class Algo {
 				missingWordCounter++;
 			}
 		}
-		
-		//mymap.setMark(20.0 - ((missingWordCounter - authorizedMissingThreshold) + wrongLabelCounter) * deltaPointLabel - wrongLinkCounter * deltaPointLink); //la note ne sera pas calculée
-		
 		// FIN ALGO
 	}
 
