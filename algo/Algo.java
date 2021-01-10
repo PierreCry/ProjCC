@@ -11,7 +11,20 @@ public class Algo {
 	private static int missingWordCounter;
 	
 	public static void main(String[] args) {
-		Map mymap = new Map();
+		SaveParser sp = new SaveParser("c:\\Users\\befey\\eclipse-workspace\\ProjetClasses\\src\\test.txt");
+		Map mymap = sp.Parse2Map();
+		
+		for(String s : mymap.getLabelList().getLabelNames()) {
+			System.out.println(s);
+		}
+		
+		System.out.println();
+		
+		for(Link l : mymap.getLinkList().getLinks()) {
+			System.out.println(l.getPreLabel().getKeywords() + " -> " + l.getVerb() + " -> " + l.getPostLabel().getKeywords());
+		}
+		
+		/*
 		wrongLabelCounter = 0;
 		wrongLinkCounter = 0;
 		missingWordCounter = 0;
@@ -47,7 +60,12 @@ public class Algo {
 				missingWordCounter++;
 			}
 		}
+		
+		//mymap.setMark(20.0 - ((missingWordCounter - authorizedMissingThreshold) + wrongLabelCounter) * deltaPointLabel - wrongLinkCounter * deltaPointLink); //la note ne sera pas calculée
+		
 		// FIN ALGO
+		
+		*/
 	}
 
 	public static LabelList getCorrectLabels() {
