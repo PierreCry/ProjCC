@@ -20,10 +20,12 @@ public class LabelList {
 	public boolean containsGeneralized(Label label){
 		if(labelNames.contains(label.getKeywords())) return true;
 
+		/*
 		for(String lab : labelNames){
 			if(label.getSynonyms().contains(lab))
 				return true;
 		}
+		*/
 
 		return false;
 	}

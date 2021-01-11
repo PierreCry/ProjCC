@@ -30,10 +30,12 @@ public class LinkList {
 					return true;
 				}
 				
+				/*
 				if(link.getPreLabel().getSynonyms().contains(lin.getPreLabel().getKeywords()) &&
 						link.getPostLabel().getSynonyms().contains(lin.getPostLabel().getKeywords())) {
 					return true;
 				}
+				*/
 			}
 		}
 
