@@ -12,51 +12,69 @@ function openCity(evt,project) {
     evt.currentTarget.className += " active";
 }
 
-var nb_fen = 1;
+var nb_fen;
+var i;
+list = new Array();
+for(i=0;i<15;i++){
+    list[i] = 0;
+}
+list[0] = 1;
 
 function New() {
 
-    nb_fen++;
+    i = -1;
+    do{
+        i++;
+        nb_fen = list[i];
+    }while(nb_fen!=0 && nb_fen!=10)
+    if(nb_fen==10){
+        alert("Il y a trop d'onglets pour en créer un nouveau !");
+    }
 
-    var tab = '<button class="t5 tablinks" onclick="openCity(event,'+ nb_fen + ')" id="t'+ nb_fen +'">Projet ' + nb_fen + '<close id="c'+ nb_fen +'" onClick="reply_click(this.id)">&times;</close></button>';
+    else{
+        nb_fen = i+1;
+        list[i] = nb_fen;
 
-    $(".tab").append(
-        tab
-    );
+        var tab = '<button class="t5 tablinks" onclick="openCity(event,'+ nb_fen + ')" id="t'+ nb_fen +'">Projet ' + nb_fen + '<close id="c'+ nb_fen +'" onClick="reply_click(this.id)">&times;</close></button>';
 
-    $(".content").append( 
-        '<div id="P' + nb_fen + '" class="tabcontent">' +
-            '<div class="row">' +
-                '<!-- Canvas menu -->' +
-                '<div class="column3">' +
-                    '<div class="icon-bar">' +
-                        '<a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a>' +
-                        '<a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a>' +
-                        '<a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a>' +
-                        '<a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>' +
+        $(".tab").append(
+            tab
+        );
+
+        $(".content").append( 
+            '<div id="P' + nb_fen + '" class="tabcontent">' +
+                '<div class="row">' +
+                    '<!-- Canvas menu -->' +
+                    '<div class="column3">' +
+                        '<div class="icon-bar">' +
+                            '<a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a>' +
+                            '<a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a>' +
+                            '<a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a>' +
+                            '<a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>' +
+                        '</div>' +
+                    '</div>' +
+                    '<!-- Canvas -->' +
+                    '<div class="column1">' +
+                        '<div id="canvas-container">' +
+                            '<canvas id="canvas"></canvas>' +
+                        '</div>' +
+                    '</div>' +
+                    '<!-- Marked for tags -->' +
+                    '<div class="column2">' +
+                        '<div id="option-container">' +
+                            '<input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 2% 0px; width: 100%;">' +
+                        '</div>' +
+                        '<div id="marked-container">' +
+                            '<textarea id="marked"></textarea>' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
-                '<!-- Canvas -->' +
-                '<div class="column1">' +
-                    '<div id="canvas-container">' +
-                        '<canvas id="canvas"></canvas>' +
-                    '</div>' +
-                '</div>' +
-                '<!-- Marked for tags -->' +
-                '<div class="column2">' +
-                    '<div id="option-container">' +
-                        '<input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 2% 0px; width: 100%;">' +
-                    '</div>' +
-                    '<div id="marked-container">' +
-                        '<textarea id="marked"></textarea>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>'
-    );
+            '</div>'
+        );
 
-    var tabid = 't'.concat(nb_fen);
-    document.getElementById(tabid).click();
+        var tabid = 't'.concat(nb_fen);
+        document.getElementById(tabid).click();
+    }
 }
 
 function openNav() {
@@ -74,4 +92,6 @@ function reply_click(clicked_id){
     var tab = document.getElementById(tabid);
     tabbutton.remove(tabbutton);
     tab.remove(tab);
+    var num = parseInt(clicked_id.substr(1));
+    list[num-1] = 0;
 }
