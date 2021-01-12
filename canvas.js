@@ -4,13 +4,14 @@ const NODE_LABEL_OFFSETX = 20
 const NODE_LABEL_OFFSETY = 20
 const LINK_HANDLE_RADIUS = 10
 const ZOOM_SPEED = 1.05
+const FONT = 'Open Sans'
 
 class GraphicalNode {
-    constructor(node, kNode) {
+    constructor(node, index, kNode) {
         this.node = node
+        this.index = index
         this.kNode = kNode
-        this.inGLinks = []
-        this.outGLinks = []
+        this.gLinks = []
     }
 }
 
@@ -24,56 +25,48 @@ class GraphicalLink {
     }
 
     updateHandles(gNodes) {
+        // Étant donné que `moveHandle` déplace les *deux côtés* de la flèche,
+        // il suffit de lui demander de déplacer un côté, et il déplacera
+        // l'autre.
         const startHandlePos = computeArrowIntersection(gNodes[this.link.from].kNode, gNodes[this.link.to].kNode)
-        const endHandlePos = computeArrowIntersection(gNodes[this.link.to].kNode, gNodes[this.link.from].kNode)
-        // TODO: On vient de calculer le point d'intersection, mais on va le
-        // recalculer dans `moveStartHandle` et `moveEndHandle` !
-        this.moveStartHandle(gNodes, startHandlePos.x, startHandlePos.y)
-        this.moveEndHandle(gNodes, endHandlePos.x, endHandlePos.y)
+        this.moveHandle(true, gNodes, startHandlePos.x, startHandlePos.y)
     }
 
-    moveStartHandle(gNodes, newX, newY) {
-        this.kStartHandle.x(newX)
-        this.kStartHandle.y(newY)
+    moveHandle(isStartHandle, gNodes, newX, newY) {
+        // Calcul de l'intersection avec le nœud opposé
+        const gNodeOtherSide = isStartHandle ? gNodes[this.link.to] : gNodes[this.link.from]
+        const otherSide = computeArrowIntersectionFromPoints(gNodeOtherSide.kNode, newX, newY)
 
         // Mise à jour de la flèche
-        this.kArrow.points()[0] = newX
-        this.kArrow.points()[1] = newY
+        // TODO: Les handles, qui permettent de déplacer la flèche, sont placés
+        // exactement sur le début et la fin de la flèche, ce qui fait qu'on
+        // peut prendre la flèche par erreur si on clique trop près du bord des
+        // nœuds. Il faut réfléchir à un positionnement plus adapté.
+        if (isStartHandle) {
+            this.kStartHandle.x(newX)
+            this.kStartHandle.y(newY)
+            this.kArrow.points()[0] = newX
+            this.kArrow.points()[1] = newY
+            this.kArrow.points()[2] = otherSide.x
+            this.kArrow.points()[3] = otherSide.y
+            this.kEndHandle.x(otherSide.x)
+            this.kEndHandle.y(otherSide.y)
+        } else {
+            this.kEndHandle.x(newX)
+            this.kEndHandle.y(newY)
+            this.kArrow.points()[0] = otherSide.x
+            this.kArrow.points()[1] = otherSide.y
+            this.kArrow.points()[2] = newX
+            this.kArrow.points()[3] = newY
+            this.kStartHandle.x(otherSide.x)
+            this.kStartHandle.y(otherSide.y)
+        }
 
         // Mise à jour du label
         const halfLabelWidth = this.kLabel.width() * .5
         const halfLabelHeight = this.kLabel.height() * .5
         this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
         this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
-
-        // Met à jour l'autre côté de la flèche
-        const end = computeArrowIntersectionFromPoints(gNodes[this.link.to].kNode, newX, newY)
-        this.kEndHandle.x(end.x)
-        this.kEndHandle.y(end.y)
-        this.kArrow.points()[2] = end.x
-        this.kArrow.points()[3] = end.y
-    }
-
-    moveEndHandle(gNodes, newX, newY) {
-        this.kEndHandle.x(newX)
-        this.kEndHandle.y(newY)
-
-        // Mise à jour de la flèche
-        this.kArrow.points()[2] = newX
-        this.kArrow.points()[3] = newY
-
-        // Mise à jour du label
-        const halfLabelWidth = this.kLabel.width() * .5
-        const halfLabelHeight = this.kLabel.height() * .5
-        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
-        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
-
-        // Met à jour l'autre côté de la flèche
-        const start = computeArrowIntersectionFromPoints(gNodes[this.link.from].kNode, newX, newY)
-        this.kStartHandle.x(start.x)
-        this.kStartHandle.y(start.y)
-        this.kArrow.points()[0] = start.x
-        this.kArrow.points()[1] = start.y
     }
 }
 
@@ -140,12 +133,12 @@ window.addEventListener('DOMContentLoaded', () => {
             cornerRadius: 4,
         })
 
-        let gNode = new GraphicalNode(node, kNode)
+        let gNode = new GraphicalNode(node, nodeIndex, kNode)
 
         let kLabel = new Konva.Label()
         let kText = new Konva.Text({
             text: node.name,
-            fontFamily: 'Quicksand',
+            fontFamily: FONT,
             fontStyle: 'bold',
             listening: false
         })
@@ -153,13 +146,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Mise à jour des flèches reliées à ce nœud
         const updateLinks = () => {
-            for (let gLink of gNode.outGLinks) {
+            for (let gLink of gNode.gLinks) {
                 gLink.updateHandles(gNodes)
             }
-            for (let gLink of gNode.inGLinks) {
-                gLink.updateHandles(gNodes)
-            }
-            kMainLayer.batchDraw()
         }
 
         // Taille initiale du node
@@ -201,7 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
         gNodes.push(gNode)
     }
 
-    for (let [linkIndex, link] of map.links.entries()) {
+    for (let link of map.links) {
         let kStartHandle = new Konva.Circle({
             radius: LINK_HANDLE_RADIUS,
             // fill: 'red',
@@ -231,66 +220,14 @@ window.addEventListener('DOMContentLoaded', () => {
         let kText = new Konva.Text({
             text: link.verb,
             padding: 2,
-            fontFamily: 'Quicksand'
+            fontFamily: FONT
         })
         kLabel.add(kText)
 
         let graphicalLink = new GraphicalLink(link, kArrow, kLabel, kStartHandle, kEndHandle)
 
-        const dragEndHandle = (isStartHandle) => {
-            const pos = kStage.getPointerPosition()
-            const intersectedKNode = kMainLayer.getIntersection(pos);
-
-            if (intersectedKNode) {
-                let oldNode
-                const intersectedNodeIndex = intersectedKNode.index
-                if (isStartHandle) {
-                    oldNode = gNodes[link.from].kNode
-                    link.from = intersectedNodeIndex
-                } else {
-                    oldNode = gNodes[link.to].kNode
-                    link.to = intersectedNodeIndex
-                }
-                // Si on a relié le début et la fin au même nœud, on inverse les liens,
-                // sinon on prend le nouveau nœud
-                // if (intersectedKNode === gNodes[link.to].kNode) {
-                //     [link.from, link.to] = [link.to, link.from]
-                // }
-
-                // On met à jour les liens entrants et sortants de l'ancien
-                // nœud et du nouveau nœud intersecté
-                if (isStartHandle) {
-                    for (let i = 0; i < gNodes[oldNode.index].outGLinks.length; ++i) {
-                        if (gNodes[oldNode.index].outGLinks[i] === graphicalLink) {
-                            gNodes[oldNode.index].outGLinks.splice(i, 1)
-                            break
-                        }
-                    }
-                    gNodes[intersectedNodeIndex].outGLinks.push(graphicalLink)
-                } else {
-                    for (let i = 0; i < gNodes[oldNode.index].inGLinks.length; ++i) {
-                        if (gNodes[oldNode.index].inGLinks[i] === graphicalLink) {
-                            gNodes[oldNode.index].inGLinks.splice(i, 1)
-                            break
-                        }
-                    }
-                    gNodes[intersectedNodeIndex].inGLinks.push(graphicalLink)
-                }
-            }
-
-            if (isStartHandle) {
-                kStartHandle.moveTo(kMainLayer)
-            } else {
-                kEndHandle.moveTo(kMainLayer)
-            }
-
-            graphicalLink.updateHandles(gNodes)
-            kMainLayer.batchDraw()
-        }
-
-        kStartHandle.on('dragend', () => dragEndHandle(true))
-        kEndHandle.on('dragend', () => dragEndHandle(false))
-
+        // On met les handles sur leur propre layer quand on les drag pour
+        // qu'ils ne gênent pas lors de la détection du nœud intersecté
         kStartHandle.on('dragstart', () => {
             kStartHandle.moveTo(kDragLayer)
         })
@@ -299,13 +236,75 @@ window.addEventListener('DOMContentLoaded', () => {
         })
 
         kStartHandle.on('dragmove', () => {
-            graphicalLink.moveStartHandle(gNodes, kStartHandle.x(), kStartHandle.y())
+            graphicalLink.moveHandle(true, gNodes, kStartHandle.x(), kStartHandle.y())
             kMainLayer.batchDraw()
         })
         kEndHandle.on('dragmove', () => {
-            graphicalLink.moveEndHandle(gNodes, kEndHandle.x(), kEndHandle.y())
+            graphicalLink.moveHandle(false, gNodes, kEndHandle.x(), kEndHandle.y())
             kMainLayer.batchDraw()
         })
+
+        const onHandleDragEnd = (isStartHandle) => {
+            const pos = kStage.getPointerPosition()
+            // TODO: On récupère le nœud intersecté depuis le layer principal,
+            // en espérant que les "rectangles" représentant les nœuds soient
+            // les premiers objets à être intersectés. Cela signifie que si par
+            // hasard il y a des éléments graphiques sur ce layer et qu'ils sont
+            // "devant" les nœuds, on ne détectera pas l'intersection avec le
+            // rectangle sous-jacent. Pour s'assurer de détecter l'intersection
+            // quelque soient les éléments sur le rectangle, on pourrait
+            // simplement parcourir chaque rectangle et tester si le curseur
+            // se trouve à l'intérieur du rectangle, mais ce n'est pas très
+            // efficace. Une autre solution serait peut-être de placer les
+            // rectangles sur leur propre layer ou quelque chose comme ça.
+            const intersectedKNode = kMainLayer.getIntersection(pos);
+
+            // TODO: On suppose que si on a intersecté un rectangle, c'est
+            // qu'on a intersecté un nœud, ce qui n'est pas forcément le cas.
+            if (intersectedKNode && intersectedKNode instanceof Konva.Rect) {
+                const intersectedNodeIndex = intersectedKNode.index
+                // Si on a relié le début et la fin au même nœud, on inverse les
+                // liens, sinon on se connecte au nouveau nœud
+                if (!isStartHandle && intersectedNodeIndex === link.from ||
+                    isStartHandle && intersectedNodeIndex === link.to
+                ) {
+                    [link.from, link.to] = [link.to, link.from]
+                } else {
+                    let oldNode
+                    if (isStartHandle) {
+                        oldNode = gNodes[link.from]
+                        link.from = intersectedNodeIndex
+                    } else {
+                        oldNode = gNodes[link.to]
+                        link.to = intersectedNodeIndex
+                    }
+                    // On supprime ce lien de l'ancien nœud...
+                    for (let i = 0; i < oldNode.gLinks.length; ++i) {
+                        if (oldNode.gLinks[i] === graphicalLink) {
+                            oldNode.gLinks.splice(i, 1)
+                            break
+                        }
+                    }
+                    // ...et on l'ajoute au nœud intersecté
+                    gNodes[intersectedNodeIndex].gLinks.push(graphicalLink)
+                }
+
+            }
+
+            // On remet le handle sur le layer principal
+            if (isStartHandle) {
+                kStartHandle.moveTo(kMainLayer)
+            } else {
+                kEndHandle.moveTo(kMainLayer)
+            }
+            kDragLayer.draw()
+
+            graphicalLink.updateHandles(gNodes)
+            kMainLayer.draw()
+        }
+
+        kStartHandle.on('dragend', () => onHandleDragEnd(true))
+        kEndHandle.on('dragend', () => onHandleDragEnd(false))
 
         kLabel.on('dblclick', () => {
             konvaHandleTextInput(kText, newValue => {
@@ -325,12 +324,15 @@ window.addEventListener('DOMContentLoaded', () => {
         gLinks.push(graphicalLink)
     }
 
-    for (let [gNodeIndex, gNode] of gNodes.entries()) {
+    // Initialisation des liens connectés aux nœuds
+    for (let [nodeIndex, gNode] of gNodes.entries()) {
+        gNode.gLinks = []
+
         for (const gLink of gLinks) {
-            if (gLink.link.from === gNodeIndex) {
-                gNode.outGLinks.push(gLink)
-            } else if (gLink.link.to === gNodeIndex) {
-                gNode.inGLinks.push(gLink)
+            if (gLink.link.from === nodeIndex ||
+                gLink.link.to === nodeIndex
+            ) {
+                gNode.gLinks.push(gLink)
             }
         }
     }
