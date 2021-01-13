@@ -1,0 +1,669 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width:1500px) {
+}
+
+@media (min-width:1200px) and (max-width:1500px) {
+    .t1{font-size: 12pt !important; padding: 7px 15px 7px 15px!important;}
+    .t2{font-size: 13pt !important; padding-top: 10px !important}
+    .t4{font-size: 13pt !important; padding-top: 10px !important}
+    .t4bis{font-size: 13pt !important; padding-top: 9px !important; padding-bottom: 9px !important;}
+    .button{margin: 2px !important;}
+}
+
+@media (min-width:900px) and (max-width:1200px) {
+    .t1{font-size: 10pt !important; padding: 11px !important;}
+    .t2{font-size: 12pt !important; padding-top: 10px !important}
+    .t4{font-size: 12pt !important;}
+}
+
+@media (max-width:900px) {
+    .t1{font-size: 10pt !important; padding: 11px !important;}
+    .t2{font-size: 12pt !important; padding-top: 6px !important}
+    .t4{font-size: 12pt !important;}
+}
+
+body {
+    background-color: #c7c7c7;
+}
+
+/***************************************************/
+
+.t1 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 7px;
+    padding-top: 7px
+}
+
+.t2 {
+    font-size: 14pt;
+    color: #000000;
+    text-decoration: none;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 10px;
+    padding-bottom: 9px;
+    cursor: pointer;
+}
+
+.t3 {
+    padding-left: 10px;
+}
+
+.t4 {
+    font-size: 14pt;
+    color: #000000;
+    text-decoration: none;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 9px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.t4bis {
+    font-size: 14pt;
+    color: #000000;
+    text-decoration: none;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.t5 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    font-size: 11pt;
+    letter-spacing: 0.4px;
+    color: #ffffff;
+    text-decoration: none;
+    padding: none;
+    position: center;
+}
+
+.t6 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    font-size: 10pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding: 0px;
+}
+
+.t7 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    font-size: 10pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding: 0px;
+}
+
+.t8 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 11pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding-right: 0px;
+    padding-left: 20px;
+    padding-bottom: 0px;
+    padding-top: 0px
+}
+
+.t9 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13pt;
+    letter-spacing: 0px;
+    color: #c7c7c7;
+    text-decoration: none;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    padding-top: 7px
+}
+
+/***************************************************/
+
+ul {
+    list-style-type: none;
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 1%;
+    padding: 0px;
+    overflow: hidden;
+    border: none;
+    background-color: #f4f7f8;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.19);
+}
+
+li {
+    float: left;
+    border: none;
+}
+
+li a {
+    display: block;
+    color: #000000;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
+}
+
+li a:hover {
+    color: #535353;
+    background-color: #c7c7c7;
+}
+
+li a:active {
+    transform: translateY(1px);
+    transition: 0.1s;
+}
+
+li b {
+    display: block;
+    color: #000000;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
+}
+
+li c {
+    display: block;
+    color: #000000;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
+}
+
+li b:hover {
+    color: #535353;
+}
+
+li b:active {
+    transform: translateY(2px);
+}
+
+li .active {
+    background-color: #47565c;
+    color: #f4f7f8;
+    border: none;
+}
+
+li .active:hover {
+    background-color: #192c33;
+    color: #c7c7c7;
+    border: none;
+}
+
+li .active:active {
+    background-color: #192c337a;
+    color: #c7c7c7;
+    transform: translateY(0px);
+    transition: 0.1s;
+}
+
+/***************************************************/
+
+.button {
+    display: inline-block;
+    background-color: #f4f7f8;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 20px;
+    width: 120px;
+    height: 30px;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin: 5px;
+    margin-top: 3px
+}
+
+.button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+.button span:after {
+    content: "\f04b";
+    font-family: FontAwesome;
+    padding-left: 10px;
+    padding-right: 0px;
+    margin: 0px;
+    opacity: 0;
+    top: 0;
+    right: -30px;
+    transition: 0.5s;
+}
+
+.button:hover span {
+    padding-right: 10px;
+}
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.button:active {
+    transform: translateY(3px);
+}
+
+.button1 {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/***************************************************/
+
+li .container {
+    height: 100%;
+    width: 100%;
+    background-color: #47565c;
+    border-radius: 15px;
+    padding: 10px 5px 10px 5px;
+    margin-left: 10px;
+}
+
+/***************************************************/
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 18px;
+    margin: 0px 0px 0px 2px;
+}
+  
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+  
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #c7c7c7;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+  
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 4px;
+    bottom: 2px;
+    background-color: #000000;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+  
+input:checked + .slider {
+    background-color: #47565c;
+}
+  
+input:focus + .slider {
+    box-shadow: 0 0 1px #47565c;
+}
+  
+input:checked + .slider:before {
+    -webkit-transform: translateX(18px);
+    -ms-transform: translateX(18px);
+    transform: translateX(18px);
+}
+  
+/* Rounded sliders */
+.slider.round {
+    border-radius: 20px;
+}
+  
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/***************************************************/
+
+.row{
+    width: 100%;
+    height: 100%;
+}
+
+.column1 {
+    float: left;
+    height: 100%;
+    width: 94.5%;
+    margin: 0 auto;
+    padding-left: 0%;
+    padding-top: 20px;
+    padding-right: 2%;
+    padding-bottom: 20px;
+    border: none;
+    background-color:#192c33;
+    /* Should be removed. Only for demonstration */
+}
+
+.column3 {
+    float: left;
+    height: 100%;
+    width: 3.5%;
+    margin: 0 auto;
+    padding-left: none;
+    padding-top: 20px;
+    padding-right: 0%;
+    padding-bottom: 20px;
+    border: none;
+    background-color:#192c33;
+    /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/***************************************************/
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: none;
+    background: none;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 10%;
+    background-color: #758085;
+    padding-left: 5px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 3px;
+    transition: 0.3s;
+    font-size: 92%;
+    border-radius: 20px 20px 0px 0px;
+    margin: none;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #47565c;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #192c33;
+}
+
+/* Style the tab content */
+.tabcontent {
+    width: 100%;
+    height: 83vh;
+    display: none;
+    padding: none;
+    border: none;
+    border-top: none;
+    background-color: #192c33;
+}
+
+.tab button close {
+    cursor: pointer;
+    float: right;
+    margin-left: 6px;
+    padding: 1px 8px;
+}
+  
+.tab button close:hover {
+    background: #c7c7c7;
+    color: #192c33;
+    border-radius: 30px 30px 30px 30px;
+}
+
+
+/***************************************************/
+#option-container {
+    width: 100%;
+    height: 5%;
+    background-color: #192c33;
+    border: none;
+}
+
+#marked-container {
+    height: 95%;
+    width: 100%;
+    background-color: #f4f7f8;
+    border: none;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+#marked {
+    height: 100%;
+    width: 100%;
+    resize: none;
+    font-size: normal;
+}
+
+#canvas-container {
+    height: 100%;
+    width: 100%;
+    background-color: #f4f7f8;
+    border: none;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+#canvas {
+    height: 100%;
+    width: 100%;
+}
+
+/***************************************************/
+
+.icon-bar {
+    float: right;
+    width: 70%;
+    padding-right: 0%;
+    background-color: #c7c7c7;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.icon-bar span {
+    opacity: 0;
+    font-size: 0pt;
+}
+
+.icon-bar a {
+    display: block;
+    text-align: center;
+    padding-left: 0px;
+    padding-top: 30%;
+    padding-right: 0px;
+    padding-bottom: 30%;
+    transition: all 0.2s ease;
+    color: #000000;
+    font-size: 90%;
+}
+
+.icon-bar a:hover {
+    color: #535353;
+    background-color: #f4f7f8;
+}
+
+.icon-bar a:hover span {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 10pt;
+    padding: 3px;
+    display: inline;
+    position: absolute;
+    margin-top:25px;
+    width: 130px;
+    border:1px solid #000000;
+    background:#ffffff;
+    text-align: center;
+    color: #000000;
+    opacity: 1;
+    transition-delay: 0.8s;
+    transition-duration: 0s;
+}
+
+.icon-bar a:active {
+    transform: translateY(3px);
+}
+
+.icon-bar a j{
+    color: #FF0000;
+}
+
+.icon-bar a k{
+    color: #148B00;
+}
+
+/***************************************************/
+
+.overlay {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0, 0.8);
+    overflow-x: hidden;
+    transition: 0.5s;
+}
+  
+.overlay-content {
+    position: relative;
+    top: 25%;
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+}
+  
+.overlay a {
+    padding: 8px;
+    text-decoration: none;
+    font-size: 36px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+  
+.overlay a:hover, .overlay a:focus {
+    color: #f1f1f1;
+}
+  
+.overlay .closebtn {
+    position: absolute;
+    top: 20px;
+    right: 45px;
+    font-size: 60px;
+}
+  
+@media screen and (max-height: 450px) {
+    .overlay a {font-size: 20px}
+    .overlay .closebtn {
+        font-size: 40px;
+        top: 15px;
+        right: 35px;
+    }
+}
+
+/***************************************************/
+  
+/* The popup form - hidden by default */
+.form-popup {
+    display: none;
+    position: relative;
+    margin-bottom: 20px;
+    top: 2px;
+    left: 76vw;
+    border: 2px;
+    border-color: #000000;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    max-width: 320px;
+}
+  
+/* Add styles to the form container */
+.form-container {
+    max-width: 300px;
+    padding: 10px;
+    background-color: #47565C;
+}
+  
+/* Full-width input fields */
+.form-container input[type=text], .form-container input[type=password] {
+    width: 270px;
+    padding: 15px;
+    margin: 10px 0 22px 0;
+    border: none;
+    background: #f4f7f8;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+  
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+    background-color: #ddd;
+    outline: none;
+}
+  
+/* Set a style for the submit/login button */
+.form-container .btn {
+    background-color: #148B00;
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 40%;
+    margin-bottom:10px;
+    margin-right: 12%;
+    margin-left: 2%; 
+    opacity: 0.8;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+  
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+    background-color: #FF0000;
+    margin-right: 0%;
+}
+  
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+    opacity: 1;
+}
