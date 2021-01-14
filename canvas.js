@@ -10,6 +10,10 @@ const EVENT_MOUSE_DOWN = 'mousedown touchstart'
 const EVENT_MOUSE_UP = 'mouseup touchend'
 const EVENT_DOUBLE_CLICK = 'dblclick dbltap'
 
+const STATE_DEFAULT = 1
+const STATE_CREATING_LINK = 2
+let state = STATE_DEFAULT
+
 class GraphicalNode {
     constructor(node, index) {
         this.node = node
@@ -231,6 +235,31 @@ class GraphicalLink {
                 // ...et on l'ajoute au nœud intersecté
                 gNodes[intersectedNodeIndex].gLinks.push(this)
             }
+
+        } else if (state === STATE_CREATING_LINK) {
+            // On est en train de créer un lien mais on n'a pas trouvé de nœud
+            // cible, on détruit donc le lien en cours de création
+            // TODO: Il faut détruire le gLink courant et l'enlever de la scène.
+            this.kArrow.destroy()
+            this.kLabel.destroy()
+            this.kStartHandle.destroy()
+            this.kEndHandle.destroy()
+
+            // On le supprime du nœud
+            let node = gNodes[this.link.from]
+            for (let i = 0; i < node.gLinks.length; ++i) {
+                if (node.gLinks[i] === this) {
+                    node.gLinks.splice(i, 1)
+                    break
+                }
+            }
+
+            state = STATE_DEFAULT
+
+            kDragLayer.draw()
+            kMainLayer.draw()
+
+            return
         }
 
         // On remet le handle sur le layer principal
@@ -240,6 +269,10 @@ class GraphicalLink {
             this.kEndHandle.moveTo(kMainLayer)
         }
         kDragLayer.draw()
+
+        if (state === STATE_CREATING_LINK) {
+            state = STATE_DEFAULT
+        }
 
         this.updateHandles()
 
@@ -445,6 +478,28 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         kStage.position(newPos)
         kStage.batchDraw()
+    })
+
+    // Configuration des boutons de l'interface
+    // TODO: Il faut ajouter un ID pour pouvoir sélectionner directement les
+    // boutons de l'interface.
+    let buttonsElt = document.querySelector('.icon-bar').children
+    let nodeButtonElt = buttonsElt[0]
+    let linkButtonElt = buttonsElt[1]
+
+    linkButtonElt.addEventListener('click', () => {
+        state = STATE_CREATING_LINK
+    })
+
+    nodeButtonElt.addEventListener('click', () => {
+        const node = {
+            x: 0,
+            y: 0,
+            name: 'Concept'
+        }
+        const nodeIndex = gNodes.length
+        createGNode(node, nodeIndex, kNodes, gNodes, kMainLayer, gLinks, kDragLayer)
+        kMainLayer.draw()
     })
 
     window.addEventListener('resize', () => {
