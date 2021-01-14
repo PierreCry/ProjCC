@@ -20,9 +20,7 @@
     <!-- Nav Header -->
     <ul>
         <li><a class="t1 active" href="#Aide" onclick="openNav()">Aide</a></li>
-        <li><a class="t1" href="#Nouveau" onclick="New()">Nouveau</a></li>
-        <li><a class="t1" href="#Enregistrer">Enregistrer</a></li>
-        <li><a class="t1" href="#Enregistrersous">Enregistrer sous</a></li>
+        <li><a class="t1" href="#Documents">Documents</a></li>
         <li><a class="t1" href="#Enregistrer">Exporter</a></li>
         <li><a class="t1" href="#Importer">Importer</a></li>
         <li><a class="t1" href="#Imprimer">Imprimer</a></li>
@@ -59,8 +57,10 @@
 
     <!-- Tabs -->
     <div class="tab" id="theTab">
-        <button class="t5 tablinks" onclick="openCity(event, '1')" id="t1">Projet 1
-            <close id="c1" onClick="reply_click(this.id)">&times;</close>
+        <button class="t5 tablinks" onclick="openCity(event, '1')" id="t1">
+            <left id="r1" class="t10 fas fa-arrow-left"></left>
+            <input class="text" type="text" id="doc" name="doc" value="document.nom" readonly>
+            <right id="r1" class="t10 fas fa-arrow-right"></right>
         </button>
     </div>
 
@@ -71,10 +71,9 @@
                 <div class="column3">
                     <div class="icon-bar">
                         <a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a> 
-                        <a href="#"><k class="far fa-square"><span>Valider un concept</span></k></a>
-                        <a href="#"><j class="far fa-square"><span>Invalider un concept</span></j></a>
-                        <a href="#"><k class="fas fa-external-link-alt"><span>Valider un lien</span></k></a>
-                        <a href="#"><j class="fas fa-external-link-alt"><span>Invalider un lien</span></j></a> 
+                        <a href="#"><k class="far fa-check-circle"><span>Rendre un objet valide</span></k></a>
+                        <a href="#"><l class="far fa-circle"><span>Rendre un objet neutre</span></l></a>
+                        <a href="#"><j class="far fa-times-circle"><span>Rendre un objet invalide</span></j></a>
                         <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
                     </div>
                 </div>
