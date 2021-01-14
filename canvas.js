@@ -6,6 +6,10 @@ const LINK_HANDLE_RADIUS = 10
 const ZOOM_SPEED = 1.05
 const FONT = 'Open Sans'
 
+const EVENT_MOUSE_DOWN = 'mousedown touchstart'
+const EVENT_MOUSE_UP = 'mouseup touchend'
+const EVENT_DOUBLE_CLICK = 'dblclick dbltap'
+
 class GraphicalNode {
     constructor(node, index, kNode) {
         this.node = node
@@ -121,6 +125,10 @@ window.addEventListener('DOMContentLoaded', () => {
         width: stageContainerElt.offsetWidth,
         height: stageContainerElt.offsetHeight,
         draggable: true,
+    gNode.kNode.on(EVENT_DOUBLE_CLICK, () => {
+        konvaHandleTextInput(gNode.kText, newValue => {
+            gNode.updateName(newValue)
+        }, true)
     })
 
     for (let [nodeIndex, node] of map.nodes.entries()) {
@@ -148,6 +156,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const updateLinks = () => {
             for (let gLink of gNode.gLinks) {
                 gLink.updateHandles(gNodes)
+    gNode.kNode.on(EVENT_MOUSE_DOWN, () => {
+        if (state === STATE_CREATING_LINK) {
+            const link = {
+                from: nodeIndex,
+                to: -1,
+                verb: 'Lien',
             }
         }
 
@@ -166,6 +180,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 updateLinks()
             }, true)
         })
+    gNode.kNode.on(EVENT_MOUSE_UP, () => {
+        if (state !== STATE_CREATING_LINK) {
+            gNode.kNode.stopDrag()
+        }
+    })
 
         kNode.on('dragmove', () => {
             const newX = kNode.x()
@@ -221,6 +240,10 @@ window.addEventListener('DOMContentLoaded', () => {
             text: link.verb,
             padding: 2,
             fontFamily: FONT
+    gLink.kLabel.on(EVENT_DOUBLE_CLICK, () => {
+        konvaHandleTextInput(gLink.kText, newValue => {
+            gLink.updateVerb(newValue)
+            kMainLayer.batchDraw()
         })
         kLabel.add(kText)
 
