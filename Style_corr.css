@@ -3,6 +3,10 @@
     padding: 0;
 }
 
+:root {
+    --fond: #000000;
+}
+
 @media (min-width:1500px) {
 }
 
@@ -73,13 +77,14 @@ body {
 }
 
 .t4bis {
-    font-size: 14pt;
+    font-size: 12pt;
     color: #000000;
     text-decoration: none;
     padding-left: 0px;
     padding-right: 0px;
     padding-top: 0px;
     padding-bottom: 0px;
+    margin: none;
 }
 
 .t5 {
@@ -152,6 +157,28 @@ body {
     padding-top: 5px
 }
 
+.t11 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 7px;
+    padding-top: 7px
+}
+
+.t12 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+}
+
 
 /***************************************************/
 
@@ -205,9 +232,10 @@ li c {
     display: block;
     color: #000000;
     text-align: center;
-    padding: 0px;
-    margin: 0px;
+    padding: none;
+    margin: none;
     text-decoration: none;
+    height: 95%;
 }
 
 li b:hover {
@@ -251,7 +279,7 @@ li .active:active {
     transition: all 0.2s;
     cursor: pointer;
     margin: 5px;
-    margin-top: 3px
+    margin-top: 3px;
 }
 
 .button span {
@@ -308,7 +336,7 @@ li .container {
     display: inline-block;
     width: 40px;
     height: 18px;
-    margin: 0px 0px 0px 2px;
+    margin: none;
 }
   
 .switch input { 
@@ -422,6 +450,8 @@ input:checked + .slider:before {
 
 /***************************************************/
 
+/* Big tab*/
+
 /* Style the tab */
 .tab {
     overflow: hidden;
@@ -495,6 +525,163 @@ input:checked + .slider:before {
     padding-left: 1%;
 }
 
+/* Small tab*/
+
+/* Style the tab */
+.tab2 {
+    overflow: hidden;
+    border: none;
+    background-color: #192c33;
+}
+  
+/* Style the buttons inside the tab */
+.tab2 b1 button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 50%;
+    padding: 10px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    background-color: #f1f1f1;
+}
+
+.tab2 b2 button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 50%;
+    padding: 10px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    background-color: #f1f1f1;
+}
+  
+/* Change background color of buttons on hover */
+.tab2 b1 button:hover {
+    color: #535353;
+    background-color: #D9E1F3;
+}
+
+.tab2 b2 button:hover {
+    color: #535353;
+    background-color: #4e6ea5;
+}
+  
+/* Create an active/current tablink class */
+.tab2 b1 button.active {
+    transform: translateY(2px);
+    transition: 0.1s;
+    background-color: #D9E1F3;
+}
+
+.tab2 b2 button.active {
+    transform: translateY(2px);
+    transition: 0.1s;
+    background-color: #4e6ea5;
+}
+  
+/* Style the tab content */
+.tabcontent2 {
+    display: none;
+    border: none;
+    padding-top: 1px;
+    height: 83.5%;
+}
+
+/* Small small tab*/
+
+/* Style the tab */
+.tab3 {
+    overflow: hidden;
+    border: none;
+    background-color: #D9E1F3;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.19);
+}
+  
+/* Style the buttons inside the tab */
+.tab3 button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 33.33%;
+    padding: 10px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    background-color: #f1f1f1;
+}
+  
+/* Change background color of buttons on hover */
+.tab3 button:hover {
+    color: #535353;
+    background-color: #D9E1F3;
+}
+  
+/* Create an active/current tablink class */
+.tab3 button.active {
+    transform: translateY(2px);
+    transition: 0.1s;
+    background-color: #D9E1F3;
+}
+  
+/* Style the tab content */
+.tabcontent3 {
+    display: none;
+    padding: 6px 12px;
+    border: none;
+    border-top: none;
+}
+
+/* Small small small tab*/
+
+/* Style the tab */
+.tab4 {
+    overflow: hidden;
+    border: none;
+    background-color: #4e6ea5;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.19);
+}
+  
+/* Style the buttons inside the tab */
+.tab4 button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 33.33%;
+    padding: 10px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    background-color: #f1f1f1;
+}
+  
+/* Change background color of buttons on hover */
+.tab4 button:hover {
+    color: #535353;
+    background-color: #4e6ea5;
+}
+  
+/* Create an active/current tablink class */
+.tab4 button.active {
+    transform: translateY(2px);
+    transition: 0.1s;
+    background-color: #4e6ea5;
+}
+  
+/* Style the tab content */
+.tabcontent4 {
+    display: none;
+    padding: 6px 12px;
+    border: none;
+    border-top: none;
+}
 
 /***************************************************/
 #option-container {
@@ -504,7 +691,7 @@ input:checked + .slider:before {
     border: none;
 }
 
-#marked-container {
+#tab2-container {
     height: 95%;
     width: 100%;
     background-color: #f4f7f8;
@@ -512,11 +699,18 @@ input:checked + .slider:before {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-#marked {
+#tab3-container {
     height: 100%;
     width: 100%;
-    resize: none;
-    font-size: normal;
+    background-color: #f4f7f8;
+    border: none;
+}
+
+#tab4-container {
+    height: 100%;
+    width: 100%;
+    background-color: #f4f7f8;
+    border: none;
 }
 
 #canvas-container {
@@ -713,4 +907,133 @@ input:checked + .slider:before {
 /* Add some hover effects to buttons */
 .form-container .btn:hover, .open-button:hover {
     opacity: 1;
+}
+
+/* form container 2 */
+.form-container2 {
+    max-width: 90%;
+    float: center;
+    padding: none;
+    background-color: none;
+}
+  
+/* Full-width input fields */
+.form-container2 input[type=text], .form-container2 input[type=password] {
+    width: 90%;
+    height: 5px;
+    padding: 15px;
+    margin: none;
+    border: none;
+    background: #ddd;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+  
+/* When the inputs get focus, do something */
+.form-container2 input[type=text]:focus, .form-container2 input[type=password]:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+/**************************************/
+
+/* Style the header */
+.header {
+    background-color: none;
+    padding: none;
+    color: none;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+  
+/* Style the "Add" button */
+.addBtn {
+    padding: 2px 5px 2px 5px;
+    margin-left: 5%;
+    width: 15%;
+    background-color: #f4f7f8;
+    color: #000000;
+    float: left;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+  
+.addBtn:hover {
+    background-color: #bbb;
+}
+
+.addBtn.active {
+    transform: translateY(2px);
+    transition: 0.1s;
+}
+
+/* Style the close button */
+.close2 {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 3px 5px 3px 5px;
+}
+  
+.close2:hover {
+    background-color: #7c2924;
+    color: white;
+}
+
+/* Remove margins and padding from the list */
+v ul {
+    margin: 0;
+    margin-top: 5px;
+    padding: 0;
+}
+  
+/* Style the list items */
+v ul li {
+    cursor: pointer;
+    position: relative;
+    padding: 2px 2px 2px 0px;
+    list-style-type: none;
+    background: #eee;
+    font-size: 16px;
+    transition: 0.2s;
+    width: 98%;
+    
+/* make the list items unselectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+  
+/* Set all odd list items to a different color (zebra-stripes) */
+v ul li:nth-child(odd) {
+    background: #f9f9f9;
+}
+  
+/* Darker background-color on hover */
+v ul li:hover {
+    background: #ddd;
+}
+  
+/* When clicked on, add a background color and strike out text */
+v ul li.checked {
+    background: #888;
+    color: #fff;
+    text-decoration: line-through;
+}
+  
+/* Add a "checked" mark when clicked on */
+v ul li.checked::before {
+    content: '';
+    position: absolute;
+    border-color: #fff;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    top: 10px;
+    left: 16px;
+    transform: rotate(45deg);
+    height: 15px;
+    width: 7px;
 }

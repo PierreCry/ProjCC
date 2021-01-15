@@ -86,10 +86,94 @@
                 <!-- Marked for tags -->
                 <div class="column2">
                     <div id="option-container">
-                        <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 2% 0px; width: 100%;">
+                        <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 2% 0px; width: 99%;">
                     </div>
-                    <div id="marked-container">
-                        <textarea id="marked"></textarea>
+
+                    <div id="tab2-container">
+                        <div class="tab2">
+                            <b1><button class="t11 tablinks2" onclick="openCity2(event, 'Concepts')" id="t2">Concepts</button></b1>
+                            <b2><button class="t11 tablinks2" onclick="openCity2(event, 'Liens')">Liens</button></b2>
+                        </div>
+                        
+                        <div id="Concepts" class="tabcontent2" style="background-color: #D9E1F3;">
+                            <div id="tab3-container">
+                                <div class="tab3">
+                                    <button class="t11 tablinks3" onclick="openCity3(event, 'Valide')" id="t3">Valide</button>
+                                    <button class="t11 tablinks3" onclick="openCity3(event, 'Neutre')">Neutre</button>
+                                    <button class="t11 tablinks3" onclick="openCity3(event, 'Invalide')">Invalide</button>
+                                </div>
+                                
+                                <div id="Valide" class="tabcontent3">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput1" placeholder="Entrer un concept à valider" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL1" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                                
+                                <div id="Neutre" class="tabcontent3">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput2" placeholder="Entrer un concept à neutraliser" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL2" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                                
+                                <div id="Invalide" class="tabcontent3">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput3" placeholder="Entrer un concept à invalider" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL3" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="Liens" class="tabcontent2" style="background-color: #4e6ea5;">
+                            <div id="tab4-container">
+                                <div class="tab4">
+                                    <button class="t11 tablinks4" onclick="openCity4(event, 'Valide2')" id="t4">Valide</button>
+                                    <button class="t11 tablinks4" onclick="openCity4(event, 'Neutre2')">Neutre</button>
+                                    <button class="t11 tablinks4" onclick="openCity4(event, 'Invalide2')">Invalide</button>
+                                </div>
+                                
+                                <div id="Valide2" class="tabcontent4">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput4" placeholder="Entrer un lien à valider" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL4" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                                
+                                <div id="Neutre2" class="tabcontent4">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput5" placeholder="Entrer un lien à neutraliser" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL5" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                                
+                                <div id="Invalide2" class="tabcontent4">
+                                    <div id="myDIV" class="form-container2">
+                                        <input type="text" id="myInput6" placeholder="Entrer un lien à invalider" style="margin: 1% 0px 1% 0px; width: 100%;">
+                                    </div>
+                                    <div style="overflow-y: scroll; scroll-behavior: smooth;">
+                                        <v><ul id="myUL6" style="box-shadow: none;">
+                                        </ul></v>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -97,11 +181,13 @@
     </div>
 
     <!-- Footer -->
-    <footer class="t6">&copy; Copyright 2020 ... - Version 1.0</footer>
+    <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 9.0</footer>
 
     <script>
-        // Get the element with id="defaultOpen" and click on it
         document.getElementById("t1").click();
+        document.getElementById("t2").click();
+        document.getElementById("t3").click();
+        document.getElementById("t4").click();
     </script>
 
 </body>

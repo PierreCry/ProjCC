@@ -55,7 +55,7 @@ function New() {
                     '</div>' +
                     '<!-- Canvas -->' +
                     '<div class="column1">' +
-                        '<div id="canvas-container">' +
+                        '<div id="canvas-container'+nb_fen+'" class="canvas-container">' +
                             '<canvas id="canvas"></canvas>' +
                         '</div>' +
                     '</div>' +
@@ -85,6 +85,11 @@ function reply_click(clicked_id){
     tab.remove(tab);
     var num = parseInt(clicked_id.substr(1));
     list[num-1] = 0;
+    num--;
+    var newid = 't'.concat(num.toString());
+
+    document.getElementById(newid).click();
+    alert(newid);
 }
 
 var test = 0;

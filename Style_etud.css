@@ -477,7 +477,7 @@ input:checked + .slider:before {
     font-size: normal;
 }
 
-#canvas-container {
+.canvas-container {
     height: 100%;
     width: 100%;
     background-color: #f4f7f8;

@@ -411,9 +411,9 @@ function createGLink(link, kMainLayer, kDragLayer, gNodes, gLinks) {
 window.addEventListener('DOMContentLoaded', () => {
     let map = JSON.parse(mapJSON)
 
-    let stageContainerElt = document.getElementById('canvas-container')
+    let stageContainerElt = document.getElementById('canvas-container1')
     let kStage = new Konva.Stage({
-        container: 'canvas-container',
+        container: 'canvas-container1',
         width: stageContainerElt.offsetWidth,
         height: stageContainerElt.offsetHeight,
         draggable: true,
@@ -484,8 +484,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // TODO: Il faut ajouter un ID pour pouvoir sélectionner directement les
     // boutons de l'interface.
     let buttonsElt = document.querySelector('.icon-bar').children
-    let nodeButtonElt = buttonsElt[0]
-    let linkButtonElt = buttonsElt[1]
+    let nodeButtonElt = buttonsElt[1]
+    let linkButtonElt = buttonsElt[2]
 
     linkButtonElt.addEventListener('click', () => {
         state = STATE_CREATING_LINK
