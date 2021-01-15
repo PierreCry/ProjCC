@@ -1,5 +1,3 @@
-let mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,"to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d'eau","x":138.22998992919986,"y":26.46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,"y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}`
-
 const NODE_LABEL_OFFSETX = 20
 const NODE_LABEL_OFFSETY = 20
 const LINK_HANDLE_RADIUS = 10
@@ -12,6 +10,8 @@ const EVENT_DOUBLE_CLICK = 'dblclick dbltap'
 
 const STATE_DEFAULT = 1
 const STATE_CREATING_LINK = 2
+// TODO: Le state ne doit pas être global, mais plutôt être une propriété de
+// `CanvasMap`.
 let state = STATE_DEFAULT
 
 class GraphicalNode {
@@ -185,6 +185,7 @@ class GraphicalLink {
         [this.gNodeFrom, this.gNodeTo] = [this.gNodeTo, this.gNodeFrom]
     }
 
+    // TODO: Est-ce que cette fonction ne veut pas plutôt aller dans `CanvasMap` ?
     onHandleDragEnd(isStartHandle, gNodes, kMainLayer, kDragLayer) {
         const kStage = kMainLayer.getStage()
         const pos = kStage.getPointerPosition()
@@ -282,6 +283,7 @@ class GraphicalLink {
 
 function getAbsolutePointerPosition(kStage) {
     const inverseTranform = kStage.getAbsoluteTransform().copy().invert()
+
     return inverseTranform.point(kStage.getPointerPosition())
 }
 
@@ -314,140 +316,221 @@ function computeArrowIntersection(kStartNode, kEndNode) {
     return computeArrowIntersectionFromPoints(kStartNode, endX, endY)
 }
 
-function createGNode(node, nodeIndex, kNodes, gNodes, kMainLayer, gLinks, kDragLayer) {
-    let gNode = new GraphicalNode(node, nodeIndex)
-    const kStage = kMainLayer.getStage()
-
-    gNode.kNode.on(EVENT_DOUBLE_CLICK, () => {
-        konvaHandleTextInput(gNode.kText, newValue => {
-            gNode.updateName(newValue)
-        }, true)
-    })
-
-    gNode.kNode.on('dragmove', () => {
-        gNode.move(gNode.kNode.x(), gNode.kNode.y(), gNodes)
-    })
-
-    gNode.kNode.on(EVENT_MOUSE_DOWN, () => {
-        if (state === STATE_CREATING_LINK) {
-            const link = {
-                from: nodeIndex,
-                to: -1,
-                verb: 'Lien',
-            }
-            const gLink = createGLink(link, kMainLayer, kDragLayer, gNodes, gLinks)
-            gNode.gLinks.push(gLink)
-
-            const pointerPos = getAbsolutePointerPosition(kStage)
-            gLink.kEndHandle.setAttrs({
-                x: pointerPos.x,
-                y: pointerPos.y
-            })
-            gLink.kEndHandle.startDrag()
-        } else {
-            gNode.kNode.startDrag()
-        }
-    })
-
-    gNode.kNode.on(EVENT_MOUSE_UP, () => {
-        if (state !== STATE_CREATING_LINK) {
-            gNode.kNode.stopDrag()
-        }
-    })
-
-    kNodes.add(gNode.kNode)
-    kMainLayer.add(gNode.kLabel)
-    gNodes.push(gNode)
-
-    return gNode
-}
-
-function createGLink(link, kMainLayer, kDragLayer, gNodes, gLinks) {
-    const gNodeFrom = link.from !== -1 ? gNodes[link.from] : undefined
-    const gNodeTo = link.to !== -1 ? gNodes[link.to] : undefined
-    let gLink = new GraphicalLink(link, gNodeFrom, gNodeTo)
-
-    // On met les handles sur leur propre layer quand on les drag pour
-    // qu'ils ne gênent pas lors de la détection du nœud intersecté
-    const onHandleDragStart = e => e.target.moveTo(kDragLayer)
-    gLink.kStartHandle.on('dragstart', onHandleDragStart)
-    gLink.kEndHandle.on('dragstart', onHandleDragStart)
-
-    gLink.kStartHandle.on('dragmove', () => {
-        gLink.moveHandle(true, gLink.kStartHandle.x(), gLink.kStartHandle.y())
-        kMainLayer.batchDraw()
-    })
-    gLink.kEndHandle.on('dragmove', () => {
-        gLink.moveHandle(false, gLink.kEndHandle.x(), gLink.kEndHandle.y())
-        kMainLayer.batchDraw()
-    })
-
-    gLink.kStartHandle.on('dragend', () => {
-        gLink.onHandleDragEnd(true, gNodes, kMainLayer, kDragLayer)
-    })
-    gLink.kEndHandle.on('dragend', () => {
-        gLink.onHandleDragEnd(false, gNodes, kMainLayer, kDragLayer)
-    })
-
-    gLink.kLabel.on(EVENT_DOUBLE_CLICK, () => {
-        konvaHandleTextInput(gLink.kText, newValue => {
-            gLink.updateVerb(newValue)
-            kMainLayer.batchDraw()
+class CanvasMap {
+    constructor(container) {
+        this.kStage = new Konva.Stage({
+            container,
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+            draggable: true,
         })
-    })
 
-    // Position initiale
-    gLink.updateHandles()
+        this.kMainLayer = new Konva.Layer()
+        this.kDragLayer = new Konva.Layer()
 
-    kMainLayer.add(gLink.kArrow)
-    kMainLayer.add(gLink.kLabel)
-    kMainLayer.add(gLink.kStartHandle)
-    kMainLayer.add(gLink.kEndHandle)
-    gLinks.push(gLink)
+        this.kStage.add(this.kMainLayer)
+        this.kStage.add(this.kDragLayer)
 
-    return gLink
+        this.gLinks = []
+        this.gNodes = []
+
+        // Les `kNodes` sont des `Konva.Rect`. On les met dans un groupe à part
+        // car quand on récupère le rectangle intersecté, on a besoin de
+        // l'indice qui sert à récupérer le `GraphicalNode` dans `gNodes`.
+        // TODO: Faire mieux que ça ?
+        this.kNodes = new Konva.Group()
+        this.kMainLayer.add(this.kNodes)
+
+        this.kStage.scale({ x: 1.5, y: 1.5 })
+        this.kStage.draw()
+
+        this.kStage.on('wheel', e => {
+            e.evt.preventDefault()
+            let oldScale = this.kStage.scaleX()
+            let mousePos = this.kStage.getPointerPosition()
+
+            let mousePointTo = {
+                x: (mousePos.x - this.kStage.x()) / oldScale,
+                y: (mousePos.y - this.kStage.y()) / oldScale,
+            }
+            let newScale = e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED
+
+            this.kStage.scale({ x: newScale, y: newScale })
+
+            let newPos = {
+                x: mousePos.x - mousePointTo.x * newScale,
+                y: mousePos.y - mousePointTo.y * newScale,
+            }
+            this.kStage.position(newPos)
+            this.kStage.batchDraw()
+        })
+
+        // Configuration des boutons de l'interface
+        // TODO: Il faudra passer les boutons de l'interface au constructeur au
+        // lieu de les récupérer d'ici.
+        let buttonsElt = document.querySelector('.icon-bar').children
+        let nodeButtonElt = buttonsElt[0]
+        let linkButtonElt = buttonsElt[1]
+
+        linkButtonElt.addEventListener('click', () => {
+            state = STATE_CREATING_LINK
+        })
+
+        nodeButtonElt.addEventListener('click', () => {
+            const node = {
+                x: 0,
+                y: 0,
+                name: 'Concept'
+            }
+            this.addGraphicalNode(node)
+        })
+
+        window.addEventListener('resize', () => {
+            const container = this.kStage.container()
+            const containerWidth = container.offsetWidth
+            const containerHeight = container.offsetHeight
+            this.kStage.width(containerWidth)
+            this.kStage.height(containerHeight)
+            this.kStage.batchDraw()
+        })
+    }
+
+    addGraphicalNode(node) {
+        const gNode = this._createGraphicalNode(node)
+
+        this.kNodes.add(gNode.kNode)
+        this.kMainLayer.add(gNode.kLabel)
+        this.gNodes.push(gNode)
+        this.kMainLayer.draw()
+
+        return gNode
+    }
+
+    addGraphicalLink(link) {
+        const gLink = this._createGraphicalLink(link)
+
+        this.kMainLayer.add(gLink.kArrow)
+        this.kMainLayer.add(gLink.kLabel)
+        this.kMainLayer.add(gLink.kStartHandle)
+        this.kMainLayer.add(gLink.kEndHandle)
+        this.gLinks.push(gLink)
+        this.kMainLayer.draw()
+
+        return gLink
+    }
+
+    _createGraphicalNode(node) {
+        const nodeIndex = this.gNodes.length
+        let gNode = new GraphicalNode(node, nodeIndex)
+
+        gNode.kNode.on(EVENT_DOUBLE_CLICK, () => {
+            konvaHandleTextInput(gNode.kText, newValue => {
+                gNode.updateName(newValue)
+            }, true)
+        })
+
+        gNode.kNode.on('dragmove', () => {
+            gNode.move(gNode.kNode.x(), gNode.kNode.y())
+        })
+
+        gNode.kNode.on(EVENT_MOUSE_DOWN, () => {
+            if (state === STATE_CREATING_LINK) {
+                const link = {
+                    from: nodeIndex,
+                    to: -1,
+                    verb: 'Lien',
+                }
+                // TODO: Il ne faudrait pas que `addGraphicalLink` mette à jour
+                // le layer principal car on n'a pas encore positionné les
+                // handles (on voit donc le lien apparaître à (0, 0)).
+                const gLink = this.addGraphicalLink(link)
+                gNode.gLinks.push(gLink)
+
+                const pointerPos = getAbsolutePointerPosition(this.kStage)
+                gLink.kEndHandle.setAttrs({
+                    x: pointerPos.x,
+                    y: pointerPos.y
+                })
+                gLink.kEndHandle.startDrag()
+            } else {
+                gNode.kNode.startDrag()
+            }
+        })
+
+        gNode.kNode.on(EVENT_MOUSE_UP, () => {
+            if (state !== STATE_CREATING_LINK) {
+                gNode.kNode.stopDrag()
+            }
+        })
+
+        return gNode
+    }
+
+    _createGraphicalLink(link) {
+        const gNodeFrom = link.from !== -1 ? this.gNodes[link.from] : undefined
+        const gNodeTo = link.to !== -1 ? this.gNodes[link.to] : undefined
+        let gLink = new GraphicalLink(link, gNodeFrom, gNodeTo)
+
+        // On met les handles sur leur propre layer quand on les drag pour
+        // qu'ils ne gênent pas lors de la détection du nœud intersecté
+        // TODO: Il faut empêcher de pouvoir drag un lien si on est dans l'état
+        // `STATE_CREATING_LINK`, car sinon il se détruit si on le relâche dans
+        // le vide (puisque c'est ce qu'on veut faire si on relâche un lien
+        // en cours de création).
+        const onHandleDragStart = e => e.target.moveTo(this.kDragLayer)
+        gLink.kStartHandle.on('dragstart', onHandleDragStart)
+        gLink.kEndHandle.on('dragstart', onHandleDragStart)
+
+        gLink.kStartHandle.on('dragmove', () => {
+            gLink.moveHandle(true, gLink.kStartHandle.x(), gLink.kStartHandle.y())
+            this.kMainLayer.batchDraw()
+        })
+        gLink.kEndHandle.on('dragmove', () => {
+            gLink.moveHandle(false, gLink.kEndHandle.x(), gLink.kEndHandle.y())
+            this.kMainLayer.batchDraw()
+        })
+
+        gLink.kStartHandle.on('dragend', () => {
+            gLink.onHandleDragEnd(true, this.gNodes, this.kMainLayer, this.kDragLayer)
+        })
+        gLink.kEndHandle.on('dragend', () => {
+            gLink.onHandleDragEnd(false, this.gNodes, this.kMainLayer, this.kDragLayer)
+        })
+
+        gLink.kLabel.on(EVENT_DOUBLE_CLICK, () => {
+            konvaHandleTextInput(gLink.kText, newValue => {
+                gLink.updateVerb(newValue)
+                this.kMainLayer.batchDraw()
+            })
+        })
+
+        // Position initiale
+        gLink.updateHandles()
+
+        return gLink
+    }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    let map = JSON.parse(mapJSON)
+function createCanvasMap(container, map = { nodes: [], links: [] }) {
+    let canvasMap = new CanvasMap(container)
 
-    let stageContainerElt = document.getElementById('canvas-container1')
-    let kStage = new Konva.Stage({
-        container: 'canvas-container1',
-        width: stageContainerElt.offsetWidth,
-        height: stageContainerElt.offsetHeight,
-        draggable: true,
-    })
-
-    let kMainLayer = new Konva.Layer()
-    let kDragLayer = new Konva.Layer()
-
-    kStage.add(kMainLayer)
-    kStage.add(kDragLayer)
-
-    let gLinks = []
-    let gNodes = []
-
-    // Les `kNodes` sont des `Konva.Rect`. On les met dans un groupe à part car
-    // quand on récupère le rectangle intersecté, on a besoin de l'indice qui
-    // sert à récupérer le `GraphicalNode` dans `gNodes`.
-    // TODO: Faire mieux que ça ?
-    let kNodes = new Konva.Group()
-    kMainLayer.add(kNodes)
-
-    for (const [nodeIndex, node] of map.nodes.entries()) {
-        createGNode(node, nodeIndex, kNodes, gNodes, kMainLayer, gLinks, kDragLayer)
+    // Initialisation de la map
+    // TODO: `addGraphicalNode` et `addGraphicalLink` redessinent automatiquement
+    // le canvas, ce qui fait qu'on va le redessiner plusieurs fois pour rien.
+    // Il faudrait batcher les requêtes de dessin ou quelque chose comme ça.
+    for (const node of map.nodes) {
+        canvasMap.addGraphicalNode(node)
     }
 
     for (let link of map.links) {
-        createGLink(link, kMainLayer, kDragLayer, gNodes, gLinks)
+        canvasMap.addGraphicalLink(link)
     }
 
     // Initialisation des liens connectés aux nœuds
-    for (let [nodeIndex, gNode] of gNodes.entries()) {
+    for (let [nodeIndex, gNode] of canvasMap.gNodes.entries()) {
         gNode.gLinks = []
 
-        for (const gLink of gLinks) {
+        for (const gLink of canvasMap.gLinks) {
             if (gLink.link.from === nodeIndex ||
                 gLink.link.to === nodeIndex
             ) {
@@ -455,61 +538,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+}
 
-    kStage.scale({ x: 1.5, y: 1.5 })
-    kStage.draw()
-
-    kStage.on('wheel', e => {
-        e.evt.preventDefault()
-        let oldScale = kStage.scaleX()
-        let mousePos = kStage.getPointerPosition()
-
-        let mousePointTo = {
-            x: (mousePos.x - kStage.x()) / oldScale,
-            y: (mousePos.y - kStage.y()) / oldScale,
-        }
-        let newScale = e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED
-
-        kStage.scale({ x: newScale, y: newScale })
-
-        let newPos = {
-            x: mousePos.x - mousePointTo.x * newScale,
-            y: mousePos.y - mousePointTo.y * newScale,
-        }
-        kStage.position(newPos)
-        kStage.batchDraw()
-    })
-
-    // Configuration des boutons de l'interface
-    // TODO: Il faut ajouter un ID pour pouvoir sélectionner directement les
-    // boutons de l'interface.
-    let buttonsElt = document.querySelector('.icon-bar').children
-    let nodeButtonElt = buttonsElt[1]
-    let linkButtonElt = buttonsElt[2]
-
-    linkButtonElt.addEventListener('click', () => {
-        state = STATE_CREATING_LINK
-    })
-
-    nodeButtonElt.addEventListener('click', () => {
-        const node = {
-            x: 0,
-            y: 0,
-            name: 'Concept'
-        }
-        const nodeIndex = gNodes.length
-        createGNode(node, nodeIndex, kNodes, gNodes, kMainLayer, gLinks, kDragLayer)
-        kMainLayer.draw()
-    })
-
-    window.addEventListener('resize', () => {
-        const container = kStage.container()
-        const containerWidth = container.offsetWidth
-        const containerHeight = container.offsetHeight
-        kStage.width(containerWidth)
-        kStage.height(containerHeight)
-        kStage.batchDraw()
-    })
+window.addEventListener('DOMContentLoaded', () => {
+    const mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,"to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d'eau","x":138.22998992919986,"y":26.46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,"y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}`
+    const map = JSON.parse(mapJSON)
+    const container = document.getElementById('canvas-container')
+    createCanvasMap(container, map)
 })
 
 function konvaHandleTextInput(kText, onInput, bold = false) {
