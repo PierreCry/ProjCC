@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><project name="ProjetCC" company="" webLink="http://" view-date="2020-12-09" view-index="0" gantt-divider-location="300" resource-divider-location="300" version="2.8.11" locale="fr">
+<?xml version="1.0" encoding="UTF-8"?><project name="ProjetCC" company="" webLink="http://" view-date="2020-12-10" view-index="0" gantt-divider-location="300" resource-divider-location="300" version="2.8.11" locale="fr">
     <description/>
     <view zooming-state="default:1" id="gantt-chart">
-        <field id="tpd3" name="Nom" width="167" order="0"/>
-        <field id="tpd4" name="Date de début" width="65" order="1"/>
-        <field id="tpd5" name="Date de fin" width="64" order="2"/>
-        <option id="color.recent"><![CDATA[#ff0066 #003300 #000000 #cc0066 #669900 #009933 #339900 #ffcc66 #cc0000 #ff9999]]></option>
+        <field id="tpd3" name="Nom" width="158" order="0"/>
+        <field id="tpd4" name="Date de début" width="62" order="1"/>
+        <field id="tpd5" name="Date de fin" width="61" order="2"/>
+        <option id="color.recent"><![CDATA[#cc0033 #ff9999 #ff3333 #6600cc #6600ff #9933ff #ff0066 #ff9933 #003300 #000000]]></option>
     </view>
     <view id="resource-table">
         <field id="0" name="Nom" width="210" order="0"/>
@@ -40,7 +40,7 @@
                     <depend id="963" type="2" difference="0" hardness="Strong"/>
                 </task>
                 <task id="975" name="Coaching n°2" color="#339900" meeting="true" start="2020-11-06" duration="0" complete="0" thirdDate="2020-10-22" thirdDate-constraint="0" priority="4" expand="true"/>
-                <task id="963" name="Rédaction PDDQ" color="#336600" meeting="false" start="2020-10-21" duration="16" complete="0" thirdDate="2020-10-21" thirdDate-constraint="0" expand="false">
+                <task id="963" name="Rédaction PDDQ" color="#336600" meeting="false" start="2020-10-21" duration="16" complete="0" thirdDate="2020-10-21" thirdDate-constraint="0" expand="true">
                     <depend id="975" type="2" difference="0" hardness="Strong"/>
                     <task id="964" name="Introduction et Définition" color="#669900" meeting="false" start="2020-10-21" duration="4" complete="0" thirdDate="2020-10-21" thirdDate-constraint="0" expand="true">
                         <depend id="965" type="2" difference="0" hardness="Strong"/>
@@ -124,7 +124,7 @@
                 <depend id="181" type="2" difference="0" hardness="Strong"/>
                 <depend id="434" type="2" difference="0" hardness="Strong"/>
             </task>
-            <task id="434" name="Préparation Réunion n°3" color="#ff0066" meeting="false" start="2020-10-27" duration="6" complete="0" thirdDate="2020-10-20" thirdDate-constraint="0" expand="false">
+            <task id="434" name="Préparation Réunion n°3" color="#ff0066" meeting="false" start="2020-10-27" duration="6" complete="0" thirdDate="2020-10-20" thirdDate-constraint="0" expand="true">
                 <depend id="158" type="2" difference="0" hardness="Strong"/>
                 <task id="436" name="Développement Interface" color="#ff9999" meeting="false" start="2020-10-27" duration="1" complete="0" thirdDate="2020-10-20" thirdDate-constraint="0" expand="true">
                     <depend id="826" type="2" difference="0" hardness="Strong"/>
@@ -219,6 +219,7 @@
                     </task>
                     <task id="2217" name="Préparation Présentation" color="#003300" meeting="false" start="2021-01-12" duration="3" complete="0" thirdDate="2020-12-24" thirdDate-constraint="0" expand="true">
                         <depend id="1049" type="2" difference="0" hardness="Strong"/>
+                        <depend id="1672" type="2" difference="0" hardness="Strong"/>
                     </task>
                 </task>
             </task>
@@ -236,6 +237,7 @@
         </task>
         <task id="1" name="Réunion client n°7" color="#ff0066" meeting="true" start="2021-01-11" duration="0" complete="0" thirdDate="2020-12-02" thirdDate-constraint="0" expand="true">
             <depend id="2214" type="2" difference="0" hardness="Strong"/>
+            <depend id="2368" type="2" difference="0" hardness="Strong"/>
         </task>
         <task id="1672" name="Réunion client n°8" color="#ff0066" meeting="true" start="2021-01-15" duration="0" complete="0" thirdDate="2020-12-02" thirdDate-constraint="0" expand="true"/>
         <task id="1516" name="Point réunion n°5" color="#ff0066" meeting="false" start="2020-12-07" duration="1" complete="0" thirdDate="2020-12-07" thirdDate-constraint="0" expand="true">
@@ -243,20 +245,51 @@
         </task>
         <task id="1645" name="Préparation Réunion n°6" color="#ff0066" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-07" thirdDate-constraint="0" expand="true">
             <depend id="1646" type="2" difference="0" hardness="Strong"/>
-            <task id="2236" name="Recherche Base de Données" color="#ff0066" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2237" name="Développement Interface" color="#ff0066" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2239" name="Développement Outil" color="#ff0066" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2245" name="Développement Algorithme" color="#ff0066" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2236" name="Recherche Base de Données" color="#6600ff" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2237" name="Développement Interface" color="#ff9999" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true">
+                <task id="2465" name="Canvas" color="#ff9999" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+                <task id="2467" name="Page Web" color="#ff9999" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            </task>
+            <task id="2245" name="Développement Correcteur Automatique" color="#cc0033" meeting="false" start="2020-12-08" duration="11" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
         </task>
         <task id="2263" name="Point Réunion n°6" color="#ff0066" meeting="false" start="2021-01-05" duration="1" complete="0" thirdDate="2021-01-05" thirdDate-constraint="0" expand="true">
             <depend id="2252" type="2" difference="0" hardness="Strong"/>
         </task>
         <task id="2252" name="Préparation Réunion n°7" color="#ff0066" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-07" thirdDate-constraint="0" expand="true">
             <depend id="1" type="2" difference="0" hardness="Strong"/>
-            <task id="2254" name="Recherche Base de Données" color="#ff0066" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2256" name="Développement Interface" color="#ff0066" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2258" name="Développement Outil" color="#ff0066" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
-            <task id="2260" name="Développement Algorithme" color="#ff0066" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2254" name="Recherche Base de Données" color="#6600ff" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2256" name="Développement Interface" color="#ff9999" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true">
+                <task id="2468" name="Canvas" color="#ff9999" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+                <task id="2470" name="Page Web" color="#ff9999" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            </task>
+            <task id="2260" name="Développement Correcteur Automatique" color="#cc0033" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true">
+                <task id="2433" name="Rédaction Algorithme" color="#cc0033" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2021-01-06" thirdDate-constraint="0" expand="true"/>
+                <task id="2435" name="Traduction en JS" color="#cc0033" meeting="false" start="2021-01-06" duration="5" complete="0" thirdDate="2021-01-06" thirdDate-constraint="0" expand="true"/>
+            </task>
+        </task>
+        <task id="2368" name="Point Réunion n°7" color="#ff0066" meeting="false" start="2021-01-11" duration="1" complete="0" thirdDate="2021-01-11" thirdDate-constraint="0" expand="true">
+            <depend id="2303" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="2303" name="Préparation Réunion n°8" color="#ff0066" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-07" thirdDate-constraint="0" expand="true">
+            <depend id="2381" type="2" difference="0" hardness="Strong"/>
+            <task id="2305" name="Développement Base de Données" color="#6600ff" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2307" name="Développement Interface" color="#ff9999" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true">
+                <task id="2477" name="Canvas" color="#ff9999" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+                <task id="2479" name="Page Web" color="#ff9999" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            </task>
+            <task id="2311" name="Développement Correcteur Automatique" color="#cc0033" meeting="false" start="2021-01-12" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+        </task>
+        <task id="2381" name="Réunion Groupe n°5" color="#ff9933" meeting="true" start="2021-01-13" duration="0" complete="0" thirdDate="2020-12-26" thirdDate-constraint="0" expand="true">
+            <depend id="2403" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="2403" name="Préparation Réunion n°7" color="#ff0066" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-07" thirdDate-constraint="0" expand="true">
+            <depend id="1672" type="2" difference="0" hardness="Strong"/>
+            <task id="2405" name="Développement Base de Données" color="#6600cc" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            <task id="2407" name="Développement Interface" color="#ff9999" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true">
+                <task id="2492" name="Canvas" color="#ff9999" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+                <task id="2494" name="Page Web" color="#ff9999" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
+            </task>
+            <task id="2411" name="Développement Correcteur Automatique" color="#cc0033" meeting="false" start="2021-01-13" duration="1" complete="0" thirdDate="2020-12-08" thirdDate-constraint="0" expand="true"/>
         </task>
     </tasks>
     <resources>
