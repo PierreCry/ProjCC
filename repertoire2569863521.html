@@ -1,0 +1,85 @@
+<html>
+<head>
+    <title>Les Doux</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="./images/rocket.ico">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/5cfb8f8806.js" crossorigin="anonymous"></script>
+    <script src="script.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="tab">
+        <button class="tablinks t6 fas fa-th-large" onclick="openCity(event, 'Grille')" id="gri"></button>
+        <button class="tablinks t6 fas fa-bars" onclick="openCity(event, 'Liste')" id="lis"></button>
+    </div>
+        
+    <div id="Grille" class="tabcontent">
+        <p class="t6">Grille</p>
+        <video width="50%" controls>
+            <source src="./videos/Thetest.mp4" type="video/mp4">
+            Your browser does not support HTML video.
+        </video>
+    
+        <a href="./videos/Thetest.mp4" download="LA VIDEO QUI EST DOWNLOAD">
+            <p class="t6">Dawnload là</p>
+        </a>
+    </div>
+        
+    <div id="Liste" class="tabcontent">
+        <p class="t6">Liste</p>
+        <video width="50%" controls>
+            <source src="./videos/Thetest.mp4" type="video/mp4">
+            Your browser does not support HTML video.
+        </video>
+    
+        <a href="./videos/Thetest.mp4" download="LA VIDEO QUI EST DOWNLOAD">
+            <p class="t6">Dawnload là</p>
+        </a>
+    </div>
+
+    <div class="centrer form-popup3" id="myForm3">
+        <form action="/action_page.php" class="form-container3">
+            <div class="centrer row">
+                <div class="column1" onclick="closeForm3gri()">
+                    <div class="flip-box">
+                        <div class="flip-box-inner">
+                          <div class="flip-box-front">
+                            <i class="centrer2 t4 fas fa-th-large"></i>
+                          </div>
+                          <div class="flip-box-back">
+                            <p class="centrer4 t5">GRILLE</p>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+                <div class="column2" onclick="closeForm3lis()">
+                    <div class="flip-box">
+                        <div class="flip-box-inner">
+                          <div class="flip-box-front">
+                            <i class="centrer3 t4 fas fa-bars"></i>
+                          </div>
+                          <div class="flip-box-back">
+                            <p class="centrer4 t5">LISTE</p>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="centrer form-popup2" id="myForm2">
+        <form action="/action_page.php" class="form-container2">
+            <c class="centrer t2 fas fa-check" onclick="closeForm2()"></c>
+        </form>
+    </div>
+
+</body>
+</html>

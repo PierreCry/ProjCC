@@ -1,0 +1,333 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --color1: #CF4520;
+    --color2: #FF9438;
+    --fond: #110500;
+    --color4: #FFCC52;
+    --color5: #270B00;
+    --color6: #B09E13;
+    --color7: #e4b790;
+    --color8: #f3e3be;
+    --color9: #170700;
+}
+
+body {
+    background-color: var(--fond);
+}
+
+/**************************************************
+        Typos
+****************************************************/
+
+/*Normal*/
+.t1 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13pt;
+    letter-spacing: 0px;
+    color: var(--color8);
+    text-decoration: none;
+}
+
+/*Bouton*/
+.t2 {
+    color: var(--color2);
+    text-decoration: none;
+    margin: auto;
+    cursor: pointer;
+    font-size: 100pt;
+}
+
+/*Titre*/
+.t3 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-size: 16pt;
+    letter-spacing: 0px;
+    color: var(--color7);
+    text-decoration: none;
+    margin-left: 5%; 
+}
+
+/*Icon*/
+.t4 {
+    font-size: 100px;
+    margin: 10%;
+    color: var(--fond);
+}
+
+/*Fond text*/
+.t5 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 1000;
+    font-size: 40px;
+    margin: 10%;
+    color: var(--fond);
+}
+
+/*Typo sur fond*/
+.t6 {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 40px;
+    color: var(--color2);
+    text-decoration: none;
+}
+
+c {
+    display: block;
+    text-align: center;
+    padding: none;
+    margin: none;
+    text-decoration: none;
+    opacity: 0.8;
+    font-size: 100%;
+}
+
+c:hover {
+    opacity: 1;
+}
+
+/**************************************************
+        Centrer
+****************************************************/
+
+.centrer {
+    position: absolute;
+    top: 50%; left: 50%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
+}
+
+.centrer2 {
+    position: relative;
+    top: 39%; left: 29%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
+}
+
+.centrer3 {
+    position: relative;
+    top: 39%; left: 25%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
+}
+
+.centrer4 {
+    position: relative;
+    top: 38%; left: 40%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
+}
+
+/**************************************************
+        Column
+****************************************************/
+
+.row{
+    width: 400px;
+    height: 150px;
+    padding: 50px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.column1 {
+    float: left;
+    width: 45%;
+    height: 100%;
+    margin-right: 5%;
+    background-color: transparent;
+}
+
+.column2 {
+    float: right;
+    width: 45%;
+    height: 100%;
+    margin-left: 5%;
+    background-color: transparent;
+}
+
+/**************************************************
+        flip
+****************************************************/
+
+.flip-box {
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+  
+.flip-box-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+}
+  
+.flip-box:hover .flip-box-inner {
+    transform: rotateY(180deg);
+}
+  
+.flip-box-front, .flip-box-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+  
+.flip-box-front {
+    background-color: var(--color2);
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    cursor: pointer;
+}
+  
+.flip-box-back {
+    background-color: var(--color2);
+    transform: rotateY(180deg);
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    cursor: pointer;
+}
+
+/**************************************************
+        Tab verticale
+****************************************************/
+
+/* Style the tab */
+.tab {
+    float: left;
+    background-color: var(--color9);
+    width: 70px;
+    height: 92.5%;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding-top: 4%;
+}
+  
+  /* Style the buttons inside the tab */
+.tab button {
+    display: block;
+    background-color: inherit;
+    padding: 15px;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.tab button:hover {
+    background-color: var(--color5);
+}
+
+.tab button:active {
+    transform: translateY(3px);
+}
+
+.tab button.active {
+    background-color: var(--fond);
+}
+
+.tabcontent {
+    float: left;
+    padding: 20px;
+    width: 90%;
+    height: 90%;
+    background-color: var(--fond);
+}
+
+/**************************************************
+        Form 1
+****************************************************/
+
+.form-popup {
+    display: none;
+    border: none;
+}
+
+.form-container {
+    max-width: 100%;
+    padding: 3%;
+    background-color: var(--color5);
+    opacity: 0.9;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.form-container input[type=text], .form-container input[type=password] {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: var(--color7);
+}
+
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+    background-color: var(--color8);
+    outline: none;
+}
+
+.form-container .btn {
+    background-color: var(--color6);
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom:10px;
+    opacity: 0.8;
+}
+
+.form-container .cancel {
+    background-color: var(--color1);
+}
+
+.form-container .btn:hover {
+    opacity: 1;
+}
+
+/**************************************************
+        Form 2
+****************************************************/
+
+.form-popup2 {
+    display: block;
+    border: none;
+    width: 100%;
+    height: 100%; 
+    position: fixed;
+}
+
+.form-container2 {
+    width: 100%;
+    height: 100%;
+    background-color: var(--fond);
+}
+
+/**************************************************
+        Form 3
+****************************************************/
+
+/* The popup form - hidden by default */
+.form-popup3 {
+    display: block;
+    border: none;
+    width: 100%;
+    height: 100%; 
+    position: fixed;
+}
+
+/* Add styles to the form container */
+.form-container3 {
+    width: 100%;
+    height: 100%;
+    background-color: var(--fond);
+}
