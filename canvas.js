@@ -14,29 +14,44 @@ const STATE_CREATING_LINK = 2
 // `CanvasMap`.
 let state = STATE_DEFAULT
 
-class GraphicalNode {
+class GraphicalNode extends Konva.Group {
     constructor(node, index) {
-        this.node = node
-        this.index = index
-        this.gLinks = []
-
-        let kNode = new Konva.Rect({
+        // Étant donné qu'on hérite de `Konva.Group`, il faut faire
+        // attention à ce que les propriétés de `GraphicalNode` n'écrasent pas
+        // celles de `Konva.Group`.
+        // TODO: Est-ce viable sur le long terme ? Le problème est de pouvoir
+        // récupérer un `GraphicalNode` depuis Konva lors d'un test
+        // d'intersection. Il serait mieux de pouvoir directement injecter un
+        // `GraphicalNode` dans un `Konva.Group` plutôt que de l'étendre.
+        super({
             x: node.x,
             y: node.y,
+        })
+        this.node = node
+        this.nodeIndex = index
+        this.gLinks = []
+        // Ce nom est utilisé pour savoir si on a intersecté un `GraphicalNode`
+        // quand on relâche un lien.
+        this.name('graphicalNode')
+
+        let kNode = new Konva.Rect({
             fill: '#d9e1f3',
             stroke: 'blue',
             strokeEnabled: false,
             cornerRadius: 4,
         })
 
-        let kLabel = new Konva.Label()
+        let kLabel = new Konva.Label({
+            listening: false,
+        })
         let kText = new Konva.Text({
             text: node.name,
             fontFamily: FONT,
             fontStyle: 'bold',
-            listening: false
         })
         kLabel.add(kText)
+
+        this.add(kNode, kLabel);
 
         this.kNode = kNode
         this.kLabel = kLabel
@@ -50,15 +65,26 @@ class GraphicalNode {
         this.node.x = newX
         this.node.y = newY
 
-        this.kLabel.x(newX + this.kNode.width() * .5 - this.kLabel.width() * .5)
-        this.kLabel.y(newY + this.kNode.height() * .5 - this.kLabel.height() * .5)
+        this.x(newX)
+        this.y(newY)
+
         this.updateLinks()
     }
 
     updateName(newName) {
+        const newWidth = this.kLabel.width() + NODE_LABEL_OFFSETX
+        const newHeight = this.kLabel.height() + NODE_LABEL_OFFSETY
+
         this.node.name = newName
-        this.kNode.width(this.kLabel.width() + NODE_LABEL_OFFSETX)
-        this.kNode.height(this.kLabel.height() + NODE_LABEL_OFFSETY)
+
+        this.kNode.width(newWidth)
+        this.kNode.height(newHeight)
+        this.width(newWidth)
+        this.height(newHeight)
+
+        this.kLabel.x(newWidth * .5 - this.kLabel.width() * .5)
+        this.kLabel.y(newHeight * .5 - this.kLabel.height() * .5)
+
         this.updateLinks()
     }
 
@@ -69,8 +95,10 @@ class GraphicalNode {
     }
 }
 
-class GraphicalLink {
+// TODO: Même remarque que ci-dessus par rapport à l'héritage de `Konva.Group`.
+class GraphicalLink extends Konva.Group {
     constructor(link, gNodeFrom, gNodeTo) {
+        super()
         this.link = link
         this.gNodeFrom = gNodeFrom
         this.gNodeTo = gNodeTo
@@ -108,6 +136,7 @@ class GraphicalLink {
         })
         kLabel.add(kText)
 
+        this.add(kStartHandle, kEndHandle, kArrow, kLabel)
         this.kStartHandle = kStartHandle
         this.kEndHandle = kEndHandle
         this.kArrow = kArrow
@@ -120,7 +149,7 @@ class GraphicalLink {
         // il suffit de lui demander de déplacer un côté, et il déplacera
         // l'autre.
         if (this.gNodeFrom && this.gNodeTo) {
-            const startHandlePos = computeArrowIntersection(this.gNodeFrom.kNode, this.gNodeTo.kNode)
+            const startHandlePos = computeArrowIntersection(this.gNodeFrom, this.gNodeTo)
             this.moveHandle(true, startHandlePos.x, startHandlePos.y)
         }
     }
@@ -133,7 +162,7 @@ class GraphicalLink {
     moveHandle(isStartHandle, newX, newY) {
         // Calcul de l'intersection avec le nœud opposé
         const gNodeOtherSide = isStartHandle ? this.gNodeTo : this.gNodeFrom
-        const otherSide = computeArrowIntersectionFromPoints(gNodeOtherSide.kNode, newX, newY)
+        const otherSide = computeArrowIntersectionFromPoints(gNodeOtherSide, newX, newY)
 
         // TODO: On peut utiliser `setAttrs` pour configurer plusieurs attributs
         // d'un coup, au lieu de le faire individuellement.
@@ -181,8 +210,8 @@ class GraphicalLink {
     }
 
     swapFromAndToNodes() {
-        [this.link.from, this.link.to] = [this.link.to, this.link.from]
-        [this.gNodeFrom, this.gNodeTo] = [this.gNodeTo, this.gNodeFrom]
+        ;[this.link.from, this.link.to] = [this.link.to, this.link.from]
+        ;[this.gNodeFrom, this.gNodeTo] = [this.gNodeTo, this.gNodeFrom]
     }
 
     // TODO: Est-ce que cette fonction ne veut pas plutôt aller dans `CanvasMap` ?
@@ -190,7 +219,7 @@ class GraphicalLink {
         const kStage = kMainLayer.getStage()
         const pos = kStage.getPointerPosition()
         // TODO: On récupère le nœud intersecté depuis le layer principal,
-        // en espérant que les "rectangles" représentant les nœuds soient
+        // en espérant que les `GraphicalNode` représentant les nœuds soient
         // les premiers objets à être intersectés. Cela signifie que si par
         // hasard il y a des éléments graphiques sur ce layer et qu'ils sont
         // "devant" les nœuds, on ne détectera pas l'intersection avec le
@@ -199,44 +228,46 @@ class GraphicalLink {
         // simplement parcourir chaque rectangle et tester si le curseur
         // se trouve à l'intérieur du rectangle, mais ce n'est pas très
         // efficace. Une autre solution serait peut-être de placer les
-        // rectangles sur leur propre layer ou quelque chose comme ça.
+        // nœuds sur leur propre layer ou quelque chose comme ça.
         const intersectedKNode = kMainLayer.getIntersection(pos);
 
-        // TODO: On suppose que si on a intersecté un rectangle, c'est
-        // qu'on a intersecté un nœud, ce qui n'est pas forcément le cas.
-        if (intersectedKNode && intersectedKNode instanceof Konva.Rect) {
-            const intersectedNodeIndex = intersectedKNode.index
-            // Si on a relié le début et la fin au même nœud, on inverse les
-            // liens, sinon on se connecte au nouveau nœud
-            if (!isStartHandle && intersectedNodeIndex === this.link.from ||
-                isStartHandle && intersectedNodeIndex === this.link.to
-            ) {
-                this.swapFromAndToNodes()
-            } else {
-                let oldNode
-                if (isStartHandle) {
-                    oldNode = gNodes[this.link.from]
-                    this.setFromNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
-                } else {
-                    if (this.link.to !== -1) {
-                        oldNode = gNodes[this.link.to]
-                    }
-                    this.setToNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
-                }
+        if (intersectedKNode) {
+            const gNode = intersectedKNode.findAncestor('.graphicalNode')
+            if (gNode) {
+                // On a intersecté un `GraphicalNode`
+                const intersectedNodeIndex = gNode.nodeIndex
 
-                if (oldNode) {
-                    // On supprime ce lien de l'ancien nœud...
-                    for (let i = 0; i < oldNode.gLinks.length; ++i) {
-                        if (oldNode.gLinks[i] === this) {
-                            oldNode.gLinks.splice(i, 1)
-                            break
+                // Si on a relié le début et la fin au même nœud, on inverse les
+                // liens, sinon on se connecte au nouveau nœud
+                if (!isStartHandle && intersectedNodeIndex === this.link.from ||
+                    isStartHandle && intersectedNodeIndex === this.link.to
+                ) {
+                    this.swapFromAndToNodes()
+                } else {
+                    let oldNode
+                    if (isStartHandle) {
+                        oldNode = gNodes[this.link.from]
+                        this.setFromNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
+                    } else {
+                        if (this.link.to !== -1) {
+                            oldNode = gNodes[this.link.to]
+                        }
+                        this.setToNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
+                    }
+
+                    if (oldNode) {
+                        // On supprime ce lien de l'ancien nœud...
+                        for (let i = 0; i < oldNode.gLinks.length; ++i) {
+                            if (oldNode.gLinks[i] === this) {
+                                oldNode.gLinks.splice(i, 1)
+                                break
+                            }
                         }
                     }
+                    // ...et on l'ajoute au nœud intersecté
+                    gNodes[intersectedNodeIndex].gLinks.push(this)
                 }
-                // ...et on l'ajoute au nœud intersecté
-                gNodes[intersectedNodeIndex].gLinks.push(this)
             }
-
         } else if (state === STATE_CREATING_LINK) {
             // On est en train de créer un lien mais on n'a pas trouvé de nœud
             // cible, on détruit donc le lien en cours de création
@@ -263,11 +294,12 @@ class GraphicalLink {
             return
         }
 
-        // On remet le handle sur le layer principal
+        // On remet le handle dans le `GraphicalLink` auquel il appartient (qui
+        // est un `Konva.Group`)
         if (isStartHandle) {
-            this.kStartHandle.moveTo(kMainLayer)
+            this.kStartHandle.moveTo(this)
         } else {
-            this.kEndHandle.moveTo(kMainLayer)
+            this.kEndHandle.moveTo(this)
         }
         kDragLayer.draw()
 
@@ -326,6 +358,11 @@ class CanvasMap {
         })
 
         this.kMainLayer = new Konva.Layer()
+        // On utilise le `kDragLayer` pour déplacer les éléments qui sont
+        // en train d'être déplacés afin qu'ils ne "cachent" pas le nœud
+        // sous-jacent qu'on veut intersecter avec le curseur.
+        // TODO: Au lieu de faire ça, on pourrait peut-être simplement
+        // désactiver l'écoute des événements durant le déplacement.
         this.kDragLayer = new Konva.Layer()
 
         this.kStage.add(this.kMainLayer)
@@ -333,13 +370,6 @@ class CanvasMap {
 
         this.gLinks = []
         this.gNodes = []
-
-        // Les `kNodes` sont des `Konva.Rect`. On les met dans un groupe à part
-        // car quand on récupère le rectangle intersecté, on a besoin de
-        // l'indice qui sert à récupérer le `GraphicalNode` dans `gNodes`.
-        // TODO: Faire mieux que ça ?
-        this.kNodes = new Konva.Group()
-        this.kMainLayer.add(this.kNodes)
 
         this.kStage.scale({ x: 1.5, y: 1.5 })
         this.kStage.draw()
@@ -398,9 +428,8 @@ class CanvasMap {
     addGraphicalNode(node) {
         const gNode = this._createGraphicalNode(node)
 
-        this.kNodes.add(gNode.kNode)
-        this.kMainLayer.add(gNode.kLabel)
         this.gNodes.push(gNode)
+        this.kMainLayer.add(gNode)
         this.kMainLayer.draw()
 
         return gNode
@@ -409,11 +438,8 @@ class CanvasMap {
     addGraphicalLink(link) {
         const gLink = this._createGraphicalLink(link)
 
-        this.kMainLayer.add(gLink.kArrow)
-        this.kMainLayer.add(gLink.kLabel)
-        this.kMainLayer.add(gLink.kStartHandle)
-        this.kMainLayer.add(gLink.kEndHandle)
         this.gLinks.push(gLink)
+        this.kMainLayer.add(gLink)
         this.kMainLayer.draw()
 
         return gLink
@@ -423,17 +449,17 @@ class CanvasMap {
         const nodeIndex = this.gNodes.length
         let gNode = new GraphicalNode(node, nodeIndex)
 
-        gNode.kNode.on(EVENT_DOUBLE_CLICK, () => {
+        gNode.on(EVENT_DOUBLE_CLICK, () => {
             konvaHandleTextInput(gNode.kText, newValue => {
                 gNode.updateName(newValue)
             }, true)
         })
 
-        gNode.kNode.on('dragmove', () => {
-            gNode.move(gNode.kNode.x(), gNode.kNode.y())
+        gNode.on('dragmove', () => {
+            gNode.move(gNode.x(), gNode.y())
         })
 
-        gNode.kNode.on(EVENT_MOUSE_DOWN, () => {
+        gNode.on(EVENT_MOUSE_DOWN, () => {
             if (state === STATE_CREATING_LINK) {
                 const link = {
                     from: nodeIndex,
@@ -453,13 +479,13 @@ class CanvasMap {
                 })
                 gLink.kEndHandle.startDrag()
             } else {
-                gNode.kNode.startDrag()
+                gNode.startDrag()
             }
         })
 
-        gNode.kNode.on(EVENT_MOUSE_UP, () => {
+        gNode.on(EVENT_MOUSE_UP, () => {
             if (state !== STATE_CREATING_LINK) {
-                gNode.kNode.stopDrag()
+                gNode.stopDrag()
             }
         })
 
