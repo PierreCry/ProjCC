@@ -41,7 +41,7 @@ function New() {
             tab
         );
 
-        $(".content").append( 
+        $(".content").append(
             '<div id="P' + nb_fen + '" class="tabcontent">' +
                 '<div class="row">' +
                     '<!-- Canvas menu -->' +
@@ -55,9 +55,7 @@ function New() {
                     '</div>' +
                     '<!-- Canvas -->' +
                     '<div class="column1">' +
-                        '<div id="canvas-container'+nb_fen+'" class="canvas-container">' +
-                            '<canvas id="canvas"></canvas>' +
-                        '</div>' +
+                        '<div id="canvas-container'+nb_fen+'" class="canvas-container"></div>' +
                     '</div>' +
                 '</div>' +
             '</div>'
@@ -65,6 +63,10 @@ function New() {
 
         var tabid = 't'.concat(nb_fen);
         document.getElementById(tabid).click();
+
+        // Création d'une carte vierge dans le nouvel onglet
+        const container = document.getElementById(`canvas-container${nb_fen}`);
+        createCanvasMap(container);
     }
 }
 
@@ -104,24 +106,24 @@ function openForm() {
         test = 0;
     }
 }
-  
+
 function closeForm() {
     document.getElementById("myForm").style.display = "none";
     test = 0;
 }
 
-function validate() { 
+function validate() {
     var str = document.getElementById("mdp").value;
     if (str == "123") {
         document.location.href="Interface_correcteur.html";
     }
     else {
-        alert("Mot de passe incorrect"); 
+        alert("Mot de passe incorrect");
     }
 }
 
 $(document).ready(function() {
-    $("#mdp").keydown(function(e) {    
+    $("#mdp").keydown(function(e) {
         if(e.which==13){
             var str = document.getElementById("mdp").value;
             if (str == "123") {
@@ -129,8 +131,8 @@ $(document).ready(function() {
                 document.location.href="Interface_correcteur.html";
             }
             else {
-                alert("Mot de passe incorrect"); 
+                alert("Mot de passe incorrect");
             }
         }
-    }); 
+    });
 });
