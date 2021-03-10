@@ -456,21 +456,21 @@ class CanvasMap {
         })
     }
 
-    addGraphicalNode(node) {
+    addGraphicalNode(node, redrawLayer = true) {
         const gNode = this._createGraphicalNode(node)
 
         this.gNodes.push(gNode)
         this.kMainLayer.add(gNode.kGroup)
-        this.kMainLayer.draw()
+        if (redrawLayer) this.kMainLayer.draw()
 
         return gNode
     }
 
-    addGraphicalLink(link) {
+    addGraphicalLink(link, redrawLayer = true) {
         const gLink = this._createGraphicalLink(link)
 
         this.kMainLayer.add(gLink.kGroup)
-        this.kMainLayer.draw()
+        if (redrawLayer) this.kMainLayer.draw()
 
         return gLink
     }
@@ -498,17 +498,11 @@ class CanvasMap {
                     to: -1,
                     verb: 'Lien',
                 }
-                // TODO: Il ne faudrait pas que `addGraphicalLink` mette à jour
-                // le layer principal car on n'a pas encore positionné les
-                // handles (on voit donc le lien apparaître à (0, 0)).
-                const gLink = this.addGraphicalLink(link)
+                const gLink = this.addGraphicalLink(link, false)
                 gNode.gLinks.push(gLink)
 
                 const pointerPos = getAbsolutePointerPosition(this.kStage)
-                gLink.kEndHandle.setAttrs({
-                    x: pointerPos.x,
-                    y: pointerPos.y
-                })
+                gLink.moveHandle(false, pointerPos.x, pointerPos.y)
                 gLink.kEndHandle.startDrag()
                 this.kDraggingElement = gLink.kEndHandle
             } else {
@@ -678,17 +672,16 @@ function createCanvasMap(container, map = { nodes: [], links: [] }) {
     let canvasMap = new CanvasMap(container, map)
 
     // Initialisation de la map
-    // TODO: `addGraphicalNode` et `addGraphicalLink` redessinent automatiquement
-    // le canvas, ce qui fait qu'on va le redessiner plusieurs fois pour rien.
-    // Il faudrait batcher les requêtes de dessin ou quelque chose comme ça.
     for (const node of map.nodes) {
-        canvasMap.addGraphicalNode(node)
+        canvasMap.addGraphicalNode(node, false)
     }
 
     let gLinks = []
     for (let link of map.links) {
-        gLinks.push(canvasMap.addGraphicalLink(link))
+        gLinks.push(canvasMap.addGraphicalLink(link, false))
     }
+
+    canvasMap.kMainLayer.draw()
 
     // Initialisation des liens connectés aux nœuds
     for (let [nodeIndex, gNode] of canvasMap.gNodes.entries()) {
