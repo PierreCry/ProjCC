@@ -10,9 +10,6 @@ const EVENT_DOUBLE_CLICK = 'dblclick dbltap'
 
 const STATE_DEFAULT = 1
 const STATE_CREATING_LINK = 2
-// TODO: Le state ne doit pas être global, mais plutôt être une propriété de
-// `CanvasMap`.
-let state = STATE_DEFAULT
 
 class GraphicalNode extends Konva.Group {
     constructor(node, index) {
@@ -213,104 +210,6 @@ class GraphicalLink extends Konva.Group {
         ;[this.link.from, this.link.to] = [this.link.to, this.link.from]
         ;[this.gNodeFrom, this.gNodeTo] = [this.gNodeTo, this.gNodeFrom]
     }
-
-    // TODO: Est-ce que cette fonction ne veut pas plutôt aller dans `CanvasMap` ?
-    onHandleDragEnd(isStartHandle, gNodes, kMainLayer, kDragLayer) {
-        const kStage = kMainLayer.getStage()
-        const pos = kStage.getPointerPosition()
-        // TODO: On récupère le nœud intersecté depuis le layer principal,
-        // en espérant que les `GraphicalNode` représentant les nœuds soient
-        // les premiers objets à être intersectés. Cela signifie que si par
-        // hasard il y a des éléments graphiques sur ce layer et qu'ils sont
-        // "devant" les nœuds, on ne détectera pas l'intersection avec le
-        // rectangle sous-jacent. Pour s'assurer de détecter l'intersection
-        // quelque soient les éléments sur le rectangle, on pourrait
-        // simplement parcourir chaque rectangle et tester si le curseur
-        // se trouve à l'intérieur du rectangle, mais ce n'est pas très
-        // efficace. Une autre solution serait peut-être de placer les
-        // nœuds sur leur propre layer ou quelque chose comme ça.
-        const intersectedKNode = kMainLayer.getIntersection(pos);
-
-        if (intersectedKNode) {
-            const gNode = intersectedKNode.findAncestor('.graphicalNode')
-            if (gNode) {
-                // On a intersecté un `GraphicalNode`
-                const intersectedNodeIndex = gNode.nodeIndex
-
-                // Si on a relié le début et la fin au même nœud, on inverse les
-                // liens, sinon on se connecte au nouveau nœud
-                if (!isStartHandle && intersectedNodeIndex === this.link.from ||
-                    isStartHandle && intersectedNodeIndex === this.link.to
-                ) {
-                    this.swapFromAndToNodes()
-                } else {
-                    let oldNode
-                    if (isStartHandle) {
-                        oldNode = gNodes[this.link.from]
-                        this.setFromNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
-                    } else {
-                        if (this.link.to !== -1) {
-                            oldNode = gNodes[this.link.to]
-                        }
-                        this.setToNode(intersectedNodeIndex, gNodes[intersectedNodeIndex])
-                    }
-
-                    if (oldNode) {
-                        // On supprime ce lien de l'ancien nœud...
-                        for (let i = 0; i < oldNode.gLinks.length; ++i) {
-                            if (oldNode.gLinks[i] === this) {
-                                oldNode.gLinks.splice(i, 1)
-                                break
-                            }
-                        }
-                    }
-                    // ...et on l'ajoute au nœud intersecté
-                    gNodes[intersectedNodeIndex].gLinks.push(this)
-                }
-            }
-        } else if (state === STATE_CREATING_LINK) {
-            // On est en train de créer un lien mais on n'a pas trouvé de nœud
-            // cible, on détruit donc le lien en cours de création
-            // TODO: Il faut détruire le gLink courant et l'enlever de la scène.
-            this.kArrow.destroy()
-            this.kLabel.destroy()
-            this.kStartHandle.destroy()
-            this.kEndHandle.destroy()
-
-            // On le supprime du nœud
-            let node = gNodes[this.link.from]
-            for (let i = 0; i < node.gLinks.length; ++i) {
-                if (node.gLinks[i] === this) {
-                    node.gLinks.splice(i, 1)
-                    break
-                }
-            }
-
-            state = STATE_DEFAULT
-
-            kDragLayer.draw()
-            kMainLayer.draw()
-
-            return
-        }
-
-        // On remet le handle dans le `GraphicalLink` auquel il appartient (qui
-        // est un `Konva.Group`)
-        if (isStartHandle) {
-            this.kStartHandle.moveTo(this)
-        } else {
-            this.kEndHandle.moveTo(this)
-        }
-        kDragLayer.draw()
-
-        if (state === STATE_CREATING_LINK) {
-            state = STATE_DEFAULT
-        }
-
-        this.updateHandles()
-
-        kMainLayer.draw()
-    }
 }
 
 function getAbsolutePointerPosition(kStage) {
@@ -350,6 +249,8 @@ function computeArrowIntersection(kStartNode, kEndNode) {
 
 class CanvasMap {
     constructor(container) {
+        this.state = STATE_DEFAULT
+
         this.kStage = new Konva.Stage({
             container,
             width: container.offsetWidth,
@@ -403,7 +304,7 @@ class CanvasMap {
         let linkButtonElt = buttonsElt[2]
 
         linkButtonElt.addEventListener('click', () => {
-            state = STATE_CREATING_LINK
+            this.state = STATE_CREATING_LINK
         })
 
         nodeButtonElt.addEventListener('click', () => {
@@ -460,7 +361,7 @@ class CanvasMap {
         })
 
         gNode.on(EVENT_MOUSE_DOWN, () => {
-            if (state === STATE_CREATING_LINK) {
+            if (this.state === STATE_CREATING_LINK) {
                 const link = {
                     from: nodeIndex,
                     to: -1,
@@ -484,7 +385,7 @@ class CanvasMap {
         })
 
         gNode.on(EVENT_MOUSE_UP, () => {
-            if (state !== STATE_CREATING_LINK) {
+            if (this.state !== STATE_CREATING_LINK) {
                 gNode.stopDrag()
             }
         })
@@ -507,6 +408,13 @@ class CanvasMap {
         gLink.kStartHandle.on('dragstart', onHandleDragStart)
         gLink.kEndHandle.on('dragstart', onHandleDragStart)
 
+        gLink.kStartHandle.on('dragend', () => {
+            this._onHandleDragEnd(true, gLink)
+        })
+        gLink.kEndHandle.on('dragend', () => {
+            this._onHandleDragEnd(false, gLink)
+        })
+
         gLink.kStartHandle.on('dragmove', () => {
             gLink.moveHandle(true, gLink.kStartHandle.x(), gLink.kStartHandle.y())
             this.kMainLayer.batchDraw()
@@ -514,13 +422,6 @@ class CanvasMap {
         gLink.kEndHandle.on('dragmove', () => {
             gLink.moveHandle(false, gLink.kEndHandle.x(), gLink.kEndHandle.y())
             this.kMainLayer.batchDraw()
-        })
-
-        gLink.kStartHandle.on('dragend', () => {
-            gLink.onHandleDragEnd(true, this.gNodes, this.kMainLayer, this.kDragLayer)
-        })
-        gLink.kEndHandle.on('dragend', () => {
-            gLink.onHandleDragEnd(false, this.gNodes, this.kMainLayer, this.kDragLayer)
         })
 
         gLink.kLabel.on(EVENT_DOUBLE_CLICK, () => {
@@ -534,6 +435,98 @@ class CanvasMap {
         gLink.updateHandles()
 
         return gLink
+    }
+
+    _onHandleDragEnd(isStartHandle, gLink) {
+        const pos = this.kStage.getPointerPosition()
+        // TODO: On récupère le nœud intersecté depuis le layer principal,
+        // en espérant que les `GraphicalNode` représentant les nœuds soient
+        // les premiers objets à être intersectés. Cela signifie que si par
+        // hasard il y a des éléments graphiques sur ce layer et qu'ils sont
+        // "devant" les nœuds, on ne détectera pas l'intersection avec le
+        // rectangle sous-jacent. Pour s'assurer de détecter l'intersection
+        // quelque soient les éléments sur le rectangle, on pourrait
+        // simplement parcourir chaque rectangle et tester si le curseur
+        // se trouve à l'intérieur du rectangle, mais ce n'est pas très
+        // efficace. Une autre solution serait peut-être de placer les
+        // nœuds sur leur propre layer ou quelque chose comme ça.
+        const intersectedKNode = this.kMainLayer.getIntersection(pos);
+
+        // On remet le handle dans le `GraphicalLink` auquel il appartient (qui
+        // est un `Konva.Group`)
+        if (isStartHandle) {
+            gLink.kStartHandle.moveTo(gLink)
+        } else {
+            gLink.kEndHandle.moveTo(gLink)
+        }
+        this.kDragLayer.draw()
+
+        // On récupère l'éventuel `GraphicalNode` qu'on a potentiellement
+        // intersecté
+        const gNode = intersectedKNode?.findAncestor('.graphicalNode')
+
+        if (gNode) {
+            const intersectedNodeIndex = gNode.nodeIndex
+
+            // Si on a relié le début et la fin au même nœud, on inverse les
+            // liens, sinon on se connecte au nouveau nœud
+            if (!isStartHandle && intersectedNodeIndex === gLink.link.from ||
+                isStartHandle && intersectedNodeIndex === gLink.link.to
+            ) {
+                gLink.swapFromAndToNodes()
+            } else {
+                let oldNode
+                if (isStartHandle) {
+                    oldNode = this.gNodes[gLink.from]
+                    gLink.setFromNode(intersectedNodeIndex, this.gNodes[intersectedNodeIndex])
+                } else {
+                    if (gLink.link.to !== -1) {
+                        oldNode = this.gNodes[gLink.link.to]
+                    }
+                    gLink.setToNode(intersectedNodeIndex, this.gNodes[intersectedNodeIndex])
+                }
+
+                if (oldNode) {
+                    // On supprime ce lien de l'ancien nœud...
+                    for (let i = 0; i < oldNode.gLinks.length; ++i) {
+                        if (oldNode.gLinks[i] === gLink) {
+                            oldNode.gLinks.splice(i, 1)
+                            break
+                        }
+                    }
+                }
+                // ...et on l'ajoute au nœud intersecté
+                this.gNodes[intersectedNodeIndex].gLinks.push(gLink)
+            }
+        } else if (this.state === STATE_CREATING_LINK) {
+            // On est en train de créer un lien mais on n'a pas trouvé de nœud
+            // cible, on détruit donc le lien en cours de création
+            gLink.destroy()
+
+            // On le supprime du nœud
+            let node = this.gNodes[gLink.link.from]
+            for (let i = 0; i < node.gLinks.length; ++i) {
+                if (node.gLinks[i] === gLink) {
+                    node.gLinks.splice(i, 1)
+                    break
+                }
+            }
+
+            this.state = STATE_DEFAULT
+
+            this.kDragLayer.draw()
+            this.kMainLayer.draw()
+
+            return
+        }
+
+        if (this.state === STATE_CREATING_LINK) {
+            this.state = STATE_DEFAULT
+        }
+
+        gLink.updateHandles()
+
+        this.kMainLayer.draw()
     }
 }
 
