@@ -22,26 +22,27 @@ function removeFromArray(array, elem) {
     if (indexElemToDelete >= 0) array.splice(indexElemToDelete, 1)
 }
 
-class GraphicalNode extends Konva.Group {
+class GraphicalNode {
     constructor(node, index) {
-        // Étant donné qu'on hérite de `Konva.Group`, il faut faire
-        // attention à ce que les propriétés de `GraphicalNode` n'écrasent pas
-        // celles de `Konva.Group`.
-        // TODO: Est-ce viable sur le long terme ? Le problème est de pouvoir
-        // récupérer un `GraphicalNode` depuis Konva lors d'un test
-        // d'intersection. Il serait mieux de pouvoir directement injecter un
-        // `GraphicalNode` dans un `Konva.Group` plutôt que de l'étendre.
-        super({
-            x: node.x,
-            y: node.y,
-        })
         this.node = node
-        this.nodeIndex = index
+        this.index = index
         this.gLinks = []
         this.isSelected = false
-        // Ce nom est utilisé pour savoir si on a intersecté un `GraphicalNode`
-        // quand on relâche un lien.
-        this.name('graphicalNode')
+
+        // On met tous les éléments graphiques constituant le nœud dans un
+        // `Konva.Group`.
+        this.kGroup = new Konva.Group({
+            x: node.x,
+            y: node.y,
+            // Le nom est utilisé pour savoir si on a intersecté un `GraphicalNode`
+            // quand on relâche un lien.
+            name: 'graphicalNode',
+        })
+
+        // On donne au groupe notre indice, pour pouvoir le récupérer lors du
+        // test d'intersection. Le nom de cet attribut doit être unique et ne
+        // doit pas être utilisé en interne par Konva !
+        this.kGroup.setAttr('_gNodeIndex', index)
 
         let kNode = new Konva.Rect({
             fill: '#d9e1f3',
@@ -60,7 +61,7 @@ class GraphicalNode extends Konva.Group {
         })
         kLabel.add(kText)
 
-        this.add(kNode, kLabel);
+        this.kGroup.add(kNode, kLabel);
 
         this.kNode = kNode
         this.kLabel = kLabel
@@ -68,6 +69,22 @@ class GraphicalNode extends Konva.Group {
 
         this.updateName(node.name)
         this.move(node.x, node.y)
+    }
+
+    x() {
+        return this.kGroup.x()
+    }
+
+    y() {
+        return this.kGroup.y()
+    }
+
+    width() {
+        return this.kGroup.width()
+    }
+
+    height() {
+        return this.kGroup.height()
     }
 
     setSelected(selected) {
@@ -93,8 +110,10 @@ class GraphicalNode extends Konva.Group {
 
         this.kNode.width(newWidth)
         this.kNode.height(newHeight)
-        this.width(newWidth)
-        this.height(newHeight)
+        // TODO: C'est dommage de devoir préciser la taille du `kGroup` alors
+        // qu'elle pourrait se déduire des éléments qui le constituent.
+        this.kGroup.width(newWidth)
+        this.kGroup.height(newHeight)
 
         this.kLabel.x(newWidth * .5 - this.kLabel.width() * .5)
         this.kLabel.y(newHeight * .5 - this.kLabel.height() * .5)
@@ -109,13 +128,15 @@ class GraphicalNode extends Konva.Group {
     }
 }
 
-// TODO: Même remarque que ci-dessus par rapport à l'héritage de `Konva.Group`.
-class GraphicalLink extends Konva.Group {
+class GraphicalLink {
     constructor(link, gNodeFrom, gNodeTo) {
-        super()
         this.link = link
         this.gNodeFrom = gNodeFrom
         this.gNodeTo = gNodeTo
+
+        // De même que pour les `GraphicalNode`, on stocke les éléments
+        // graphiques dans un `Konva.Group`.
+        this.kGroup = new Konva.Group()
 
         let kStartHandle = new Konva.Circle({
             radius: LINK_HANDLE_RADIUS,
@@ -150,7 +171,7 @@ class GraphicalLink extends Konva.Group {
         })
         kLabel.add(kText)
 
-        this.add(kStartHandle, kEndHandle, kArrow, kLabel)
+        this.kGroup.add(kStartHandle, kEndHandle, kArrow, kLabel)
         this.kStartHandle = kStartHandle
         this.kEndHandle = kEndHandle
         this.kArrow = kArrow
@@ -235,15 +256,15 @@ function getAbsolutePointerPosition(kStage) {
     return inverseTranform.point(kStage.getPointerPosition())
 }
 
-function computeArrowIntersectionFromPoints(kStartNode, endX, endY) {
-    let startX = kStartNode.x() + kStartNode.width() * .5
-    let startY = kStartNode.y() + kStartNode.height() * .5
+function computeArrowIntersectionFromPoints(gNodeStart, endX, endY) {
+    let startX = gNodeStart.x() + gNodeStart.width() * .5
+    let startY = gNodeStart.y() + gNodeStart.height() * .5
     let dx = endX - startX
     let dy = endY - startY
-    let tTop = (kStartNode.y() - startY) / dy
-    let tBottom = (kStartNode.y() + kStartNode.height() - startY) / dy
-    let tRight = (kStartNode.x() + kStartNode.width() - startX) / dx
-    let tLeft = (kStartNode.x() - startX) / dx
+    let tTop = (gNodeStart.y() - startY) / dy
+    let tBottom = (gNodeStart.y() + gNodeStart.height() - startY) / dy
+    let tRight = (gNodeStart.x() + gNodeStart.width() - startX) / dx
+    let tLeft = (gNodeStart.x() - startX) / dx
     let tCandidates = []
     if (tTop >= 0) tCandidates.push(tTop)
     if (tBottom >= 0) tCandidates.push(tBottom)
@@ -257,11 +278,11 @@ function computeArrowIntersectionFromPoints(kStartNode, endX, endY) {
     }
 }
 
-function computeArrowIntersection(kStartNode, kEndNode) {
-    let endX = kEndNode.x() + kEndNode.width() * .5
-    let endY = kEndNode.y() + kEndNode.height() * .5
+function computeArrowIntersection(gNodeStart, gNodeEnd) {
+    let endX = gNodeEnd.x() + gNodeEnd.width() * .5
+    let endY = gNodeEnd.y() + gNodeEnd.height() * .5
 
-    return computeArrowIntersectionFromPoints(kStartNode, endX, endY)
+    return computeArrowIntersectionFromPoints(gNodeStart, endX, endY)
 }
 
 class CanvasMap {
@@ -270,7 +291,7 @@ class CanvasMap {
         this.map = map
         this.state = STATE_DEFAULT
         this.selectedGNode = undefined
-        this.draggingElement = undefined
+        this.kDraggingElement = undefined
 
         this.kStage = new Konva.Stage({
             container,
@@ -296,9 +317,19 @@ class CanvasMap {
         this.kStage.draw()
 
         this.kStage.on(EVENT_MOUSE_DOWN, e => {
-            const clickedGNode = e.target.findAncestor('.graphicalNode')
+            // On récupère le `kGroup` d'un `GraphicalNode` qu'on a potentiellement
+            // intersecté.
+            const gNodeKGroupClicked = e.target.findAncestor('.graphicalNode')
+            // On en extrait le `gNode` à partir de l'indice stocké dans le
+            // groupe.
+            const gNodeIndex = gNodeKGroupClicked ?
+                gNodeKGroupClicked.getAttr('_gNodeIndex') :
+                -1
+            const gNodeClicked = gNodeIndex >= 0 ?
+                this.gNodes[gNodeIndex] :
+                undefined
 
-            if (clickedGNode !== this.selectedGNode) {
+            if (gNodeClicked !== this.selectedGNode) {
                 if (this.selectedGNode) {
                     // On déselectionne le nœud précédemment sélectionné
                     this.selectedGNode.setSelected(false)
@@ -306,16 +337,22 @@ class CanvasMap {
                     this._hideFloatingToolbar()
                 }
 
-                if (clickedGNode) {
+                if (gNodeClicked) {
                     // On sélectionne le nouveau nœud
-                    clickedGNode.setSelected(true)
-                    this.selectedGNode = clickedGNode
+                    gNodeClicked.setSelected(true)
+                    this.selectedGNode = gNodeClicked
 
-                    this._moveFloatingBarToNode(clickedGNode)
+                    this._moveFloatingBarToNode(gNodeClicked)
                     this._showFloatingToolbar()
                 }
 
                 this.kStage.draw()
+            }
+
+            // On repasse en mode normal si a cliqué dans le vide et qu'on est
+            // en mode création de lien.
+            if (!gNodeClicked && this.state === STATE_CREATING_LINK) {
+                this.state = STATE_DEFAULT
             }
         })
 
@@ -350,23 +387,23 @@ class CanvasMap {
             // On supprime le nœud actuellement sélectionné
             // TODO: S'assurer que `destroy` supprime aussi les event
             // listeners.
-            this.selectedGNode.destroy()
+            this.selectedGNode.kGroup.destroy()
             // TODO: Il faut supprimer les nœuds dans les deux tableaux mais
             // si on fait ça, il faut remettre à jour tous les indices pour
             // tous les liens. Pour l'instant, on met juste les nœuds à
-            // `undefined` pour conserver les indices.
-            this.gNodes[this.selectedGNode.nodeIndex] = undefined
-            this.map.nodes[this.selectedGNode.nodeIndex] = undefined
+            // `undefined` pour ne pas invalider les indices.
+            this.gNodes[this.selectedGNode.index] = undefined
+            this.map.nodes[this.selectedGNode.index] = undefined
             // removeFromArray(this.gNodes, this.selectedGNode)
             // removeFromArray(this.map.nodes, this.selectedGNode.node)
 
             // On supprime tous les liens connectés à ce nœud
             for (let gLinkIndex = this.selectedGNode.gLinks.length - 1;
-                    gLinkIndex >= 0;
-                    --gLinkIndex
+                 gLinkIndex >= 0;
+                 --gLinkIndex
             ) {
                 let gLink = this.selectedGNode.gLinks[gLinkIndex]
-                gLink.destroy()
+                gLink.kGroup.destroy()
                 // On supprime le lien des nœuds connectés
                 if (gLink.gNodeFrom) removeFromArray(gLink.gNodeFrom.gLinks, gLink)
                 if (gLink.gNodeTo) removeFromArray(gLink.gNodeTo.gLinks, gLink)
@@ -412,9 +449,9 @@ class CanvasMap {
             // *sans avoir bougé*, le prochain clic sur un objet ne sera pas
             // pris en compte (ça déplace tout le canvas). C'est probablement
             // lié au fait qu'on appelle `startDrag` manuellement.
-            if (this.draggingElement) {
-                this.draggingElement.stopDrag()
-                this.draggingElement = undefined
+            if (this.kDraggingElement) {
+                this.kDraggingElement.stopDrag()
+                this.kDraggingElement = undefined
             }
         })
     }
@@ -423,7 +460,7 @@ class CanvasMap {
         const gNode = this._createGraphicalNode(node)
 
         this.gNodes.push(gNode)
-        this.kMainLayer.add(gNode)
+        this.kMainLayer.add(gNode.kGroup)
         this.kMainLayer.draw()
 
         return gNode
@@ -432,7 +469,7 @@ class CanvasMap {
     addGraphicalLink(link) {
         const gLink = this._createGraphicalLink(link)
 
-        this.kMainLayer.add(gLink)
+        this.kMainLayer.add(gLink.kGroup)
         this.kMainLayer.draw()
 
         return gLink
@@ -442,19 +479,19 @@ class CanvasMap {
         const nodeIndex = this.gNodes.length
         let gNode = new GraphicalNode(node, nodeIndex)
 
-        gNode.on(EVENT_DOUBLE_CLICK, () => {
+        gNode.kGroup.on(EVENT_DOUBLE_CLICK, () => {
             // TODO: Le double-clic ne fonctionne plus.
             konvaHandleTextInput(gNode.kText, newValue => {
                 gNode.updateName(newValue)
             }, true)
         })
 
-        gNode.on('dragmove', () => {
+        gNode.kGroup.on('dragmove', () => {
             gNode.move(gNode.x(), gNode.y())
             this._moveFloatingBarToNode(gNode)
         })
 
-        gNode.on(EVENT_MOUSE_DOWN, () => {
+        gNode.kGroup.on(EVENT_MOUSE_DOWN, () => {
             if (this.state === STATE_CREATING_LINK) {
                 const link = {
                     from: nodeIndex,
@@ -473,13 +510,13 @@ class CanvasMap {
                     y: pointerPos.y
                 })
                 gLink.kEndHandle.startDrag()
-                this.draggingElement = gLink.kEndHandle
+                this.kDraggingElement = gLink.kEndHandle
             } else {
-                gNode.startDrag()
-                this.draggingElement = gNode
+                // On met le nœud au premier plan et on active le drag.
+                gNode.kGroup.moveToTop()
+                gNode.kGroup.startDrag()
+                this.kDraggingElement = gNode.kGroup
             }
-
-            this.kStage.draw()
         })
 
         return gNode
@@ -496,7 +533,10 @@ class CanvasMap {
         // `STATE_CREATING_LINK`, car sinon il se détruit si on le relâche dans
         // le vide (puisque c'est ce qu'on veut faire si on relâche un lien
         // en cours de création).
-        const onHandleDragStart = e => e.target.moveTo(this.kDragLayer)
+        const onHandleDragStart = e => {
+            e.target.moveTo(this.kDragLayer)
+            gLink.kGroup.moveToTop()
+        }
         gLink.kStartHandle.on('dragstart', onHandleDragStart)
         gLink.kEndHandle.on('dragstart', onHandleDragStart)
 
@@ -544,23 +584,23 @@ class CanvasMap {
         // nœuds sur leur propre layer ou quelque chose comme ça.
         const intersectedKNode = this.kMainLayer.getIntersection(pos);
 
-        // On remet le handle dans le `GraphicalLink` auquel il appartient (qui
-        // est un `Konva.Group`)
+        // On remet le handle dans le groupe du `GraphicalLink` auquel il
+        // appartient
         if (isStartHandle) {
-            gLink.kStartHandle.moveTo(gLink)
+            gLink.kStartHandle.moveTo(gLink.kGroup)
         } else {
-            gLink.kEndHandle.moveTo(gLink)
+            gLink.kEndHandle.moveTo(gLink.kGroup)
         }
         this.kDragLayer.draw()
 
-        // On récupère l'éventuel `GraphicalNode` qu'on a potentiellement
+        // On récupère le `Konva.Group` du nœud qu'on a potentiellement
         // intersecté
-        const gNode = intersectedKNode ?
+        const kGroup = intersectedKNode ?
             intersectedKNode.findAncestor('.graphicalNode') :
             undefined
 
-        if (gNode) {
-            const intersectedNodeIndex = gNode.nodeIndex
+        if (kGroup) {
+            const intersectedNodeIndex = kGroup.getAttr('_gNodeIndex')
 
             // Si on a relié le début et la fin au même nœud, on inverse les
             // liens, sinon on se connecte au nouveau nœud
@@ -582,12 +622,7 @@ class CanvasMap {
 
                 if (oldNode) {
                     // On supprime ce lien de l'ancien nœud...
-                    for (let i = 0; i < oldNode.gLinks.length; ++i) {
-                        if (oldNode.gLinks[i] === gLink) {
-                            oldNode.gLinks.splice(i, 1)
-                            break
-                        }
-                    }
+                    removeFromArray(oldNode.gLinks, gLink)
                 }
                 // ...et on l'ajoute au nœud intersecté
                 this.gNodes[intersectedNodeIndex].gLinks.push(gLink)
@@ -595,7 +630,7 @@ class CanvasMap {
         } else if (this.state === STATE_CREATING_LINK) {
             // On est en train de créer un lien mais on n'a pas trouvé de nœud
             // cible, on détruit donc le lien en cours de création
-            gLink.destroy()
+            gLink.kGroup.destroy()
             // On le supprime du nœud
             removeFromArray(this.gNodes[gLink.link.from].gLinks, gLink)
 
@@ -627,12 +662,13 @@ class CanvasMap {
     _moveFloatingBarToNode(gNode) {
         // TODO: Récupérer la largeur dynamiquement.
         const floatingBarWidth = 40
-        let pos = gNode.absolutePosition()
+        let pos = gNode.kGroup.absolutePosition()
         pos.x +=
             this.container.offsetLeft +
             gNode.width() * this.kStage.scaleX() / 2 -
             floatingBarWidth / 2
         pos.y += this.container.offsetTop - 50
+
         this.floatingBarElt.style.left = `${pos.x}px`
         this.floatingBarElt.style.top = `${pos.y}px`
     }
