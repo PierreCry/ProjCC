@@ -667,3 +667,27 @@ input:checked + .slider:before {
 .form-container .btn:hover, .open-button:hover {
     opacity: 1;
 }
+
+/***************************************************/
+
+.floating-toolbar {
+    position: absolute;
+    background:white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #e2e2e2;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.19);
+
+    /* Doit être devant le canvas */
+    z-index: 1;
+}
+
+.floating-toolbar .floating-toolbar__button {
+    transition: color .1s;
+    font-size: 30px;
+    color: rgb(210, 210, 210);
+}
+
+.floating-toolbar .floating-toolbar__button--delete:hover {
+    color: rgb(223, 70, 70);
+}
