@@ -297,7 +297,6 @@ class CanvasMap {
             container,
             width: container.offsetWidth,
             height: container.offsetHeight,
-            draggable: true,
         })
 
         this.kMainLayer = new Konva.Layer()
@@ -317,8 +316,13 @@ class CanvasMap {
         this.kStage.draw()
 
         this.kStage.on(EVENT_MOUSE_DOWN, e => {
-            // On récupère le `kGroup` d'un `GraphicalNode` qu'on a potentiellement
-            // intersecté.
+            // On active le drag du stage si on a cliqué dans le vide
+            if (e.target === this.kStage) {
+                this.kStage.startDrag()
+            }
+
+            // On récupère le `kGroup` d'un `GraphicalNode` qu'on a
+            // potentiellement intersecté.
             const gNodeKGroupClicked = e.target.findAncestor('.graphicalNode')
             // On en extrait le `gNode` à partir de l'indice stocké dans le
             // groupe.
@@ -329,6 +333,7 @@ class CanvasMap {
                 this.gNodes[gNodeIndex] :
                 undefined
 
+            // Gestion de la sélection d'un nœud
             if (gNodeClicked !== this.selectedGNode) {
                 if (this.selectedGNode) {
                     // On déselectionne le nœud précédemment sélectionné
@@ -349,9 +354,30 @@ class CanvasMap {
                 this.kStage.draw()
             }
 
-            // On repasse en mode normal si a cliqué dans le vide et qu'on est
-            // en mode création de lien.
-            if (!gNodeClicked && this.state === STATE_CREATING_LINK) {
+            // Gestion du clic sur un nœud
+            if (gNodeClicked) {
+                if (this.state === STATE_CREATING_LINK) {
+                    const link = {
+                        from: gNodeClicked.index,
+                        to: -1,
+                        verb: 'Lien',
+                    }
+                    const gLink = this.addGraphicalLink(link, false)
+                    gNodeClicked.gLinks.push(gLink)
+
+                    const pointerPos = getAbsolutePointerPosition(this.kStage)
+                    gLink.moveHandle(false, pointerPos.x, pointerPos.y)
+                    gLink.kEndHandle.startDrag()
+                    this.kDraggingElement = gLink.kEndHandle
+                } else {
+                    // On met le nœud au premier plan et on active le drag.
+                    gNodeClicked.kGroup.moveToTop()
+                    gNodeClicked.kGroup.startDrag()
+                    this.kDraggingElement = gNodeClicked.kGroup
+                }
+            } else if (this.state === STATE_CREATING_LINK) {
+                // On repasse en mode normal si on n'a pas cliqué sur un nœud et
+                // qu'on est en mode création de lien.
                 this.state = STATE_DEFAULT
             }
         })
@@ -365,7 +391,9 @@ class CanvasMap {
                 x: (mousePos.x - this.kStage.x()) / oldScale,
                 y: (mousePos.y - this.kStage.y()) / oldScale,
             }
-            let newScale = e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED
+            let newScale = e.evt.deltaY > 0 ?
+                oldScale / ZOOM_SPEED :
+                oldScale * ZOOM_SPEED
 
             this.kStage.scale({ x: newScale, y: newScale })
 
@@ -410,8 +438,12 @@ class CanvasMap {
                 let gLink = this.selectedGNode.gLinks[gLinkIndex]
                 gLink.kGroup.destroy()
                 // On supprime le lien des nœuds connectés
-                if (gLink.gNodeFrom) removeFromArray(gLink.gNodeFrom.gLinks, gLink)
-                if (gLink.gNodeTo) removeFromArray(gLink.gNodeTo.gLinks, gLink)
+                if (gLink.gNodeFrom) {
+                    removeFromArray(gLink.gNodeFrom.gLinks, gLink)
+                }
+                if (gLink.gNodeTo) {
+                    removeFromArray(gLink.gNodeTo.gLinks, gLink)
+                }
                 removeFromArray(this.map.links, gLink.link)
             }
 
@@ -450,10 +482,8 @@ class CanvasMap {
         })
 
         window.addEventListener('mouseup', () => {
-            // TODO: Quand on clique sur un nœud et qu'on relâche la souris
-            // *sans avoir bougé*, le prochain clic sur un objet ne sera pas
-            // pris en compte (ça déplace tout le canvas). C'est probablement
-            // lié au fait qu'on appelle `startDrag` manuellement.
+            this.kStage.stopDrag()
+
             if (this.kDraggingElement) {
                 this.kDraggingElement.stopDrag()
                 this.kDraggingElement = undefined
@@ -485,7 +515,6 @@ class CanvasMap {
         let gNode = new GraphicalNode(node, nodeIndex)
 
         gNode.kGroup.on(EVENT_DOUBLE_CLICK, () => {
-            // TODO: Le double-clic ne fonctionne plus.
             konvaHandleTextInput(gNode.kText, newValue => {
                 gNode.updateName(newValue)
                 this._moveFloatingBarToNode(gNode)
@@ -495,28 +524,6 @@ class CanvasMap {
         gNode.kGroup.on('dragmove', () => {
             gNode.move(gNode.x(), gNode.y())
             this._moveFloatingBarToNode(gNode)
-        })
-
-        gNode.kGroup.on(EVENT_MOUSE_DOWN, () => {
-            if (this.state === STATE_CREATING_LINK) {
-                const link = {
-                    from: nodeIndex,
-                    to: -1,
-                    verb: 'Lien',
-                }
-                const gLink = this.addGraphicalLink(link, false)
-                gNode.gLinks.push(gLink)
-
-                const pointerPos = getAbsolutePointerPosition(this.kStage)
-                gLink.moveHandle(false, pointerPos.x, pointerPos.y)
-                gLink.kEndHandle.startDrag()
-                this.kDraggingElement = gLink.kEndHandle
-            } else {
-                // On met le nœud au premier plan et on active le drag.
-                gNode.kGroup.moveToTop()
-                gNode.kGroup.startDrag()
-                this.kDraggingElement = gNode.kGroup
-            }
         })
 
         return gNode
@@ -599,8 +606,14 @@ class CanvasMap {
             intersectedKNode.findAncestor('.graphicalNode') :
             undefined
 
-        if (kGroup) {
-            const intersectedNodeIndex = kGroup.getAttr('_gNodeIndex')
+        const intersectedNodeIndex = kGroup ? kGroup.getAttr('_gNodeIndex') : -1
+
+        if (intersectedNodeIndex >= 0 &&
+            (!this.state === STATE_CREATING_LINK ||
+             gLink.link.from !== intersectedNodeIndex)
+        ) {
+            // On a trouvé un nœud destination et dans le cas où on est en train
+            // de créer un lien, ce nœud n'est pas le nœud de départ.
 
             // Si on a relié le début et la fin au même nœud, on inverse les
             // liens, sinon on se connecte au nouveau nœud
@@ -612,12 +625,16 @@ class CanvasMap {
                 let oldNode
                 if (isStartHandle) {
                     oldNode = this.gNodes[gLink.from]
-                    gLink.setFromNode(intersectedNodeIndex, this.gNodes[intersectedNodeIndex])
+                    gLink.setFromNode(
+                        intersectedNodeIndex,
+                        this.gNodes[intersectedNodeIndex])
                 } else {
                     if (gLink.link.to !== -1) {
                         oldNode = this.gNodes[gLink.link.to]
                     }
-                    gLink.setToNode(intersectedNodeIndex, this.gNodes[intersectedNodeIndex])
+                    gLink.setToNode(
+                        intersectedNodeIndex,
+                        this.gNodes[intersectedNodeIndex])
                 }
 
                 if (oldNode) {
@@ -632,6 +649,10 @@ class CanvasMap {
             // cible, on détruit donc le lien en cours de création
             gLink.kGroup.destroy()
             // On le supprime du nœud
+            // TODO: Plutôt que de supprimer le lien après coup (quand on se
+            // rend compte qu'il n'a pas de destination), on pourrait
+            // simplement ne pas l'ajouter en premier lieu et l'ajouter
+            // seulement quand on a trouvé un nœud destination.
             removeFromArray(this.gNodes[gLink.link.from].gLinks, gLink)
 
             this.state = STATE_DEFAULT
