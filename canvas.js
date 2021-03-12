@@ -374,6 +374,11 @@ class CanvasMap {
                 y: mousePos.y - mousePointTo.y * newScale,
             }
             this.kStage.position(newPos)
+
+            if (this.selectedGNode) {
+                this._moveFloatingBarToNode(this.selectedGNode)
+            }
+
             this.kStage.batchDraw()
         })
 
@@ -483,6 +488,7 @@ class CanvasMap {
             // TODO: Le double-clic ne fonctionne plus.
             konvaHandleTextInput(gNode.kText, newValue => {
                 gNode.updateName(newValue)
+                this._moveFloatingBarToNode(gNode)
             }, true)
         })
 
