@@ -1,8 +1,15 @@
-const NODE_LABEL_OFFSETX = 20
-const NODE_LABEL_OFFSETY = 20
+const NODE_LABEL_PADDINGX = 20
+const NODE_LABEL_PADDINGY = 20
 const LINK_HANDLE_RADIUS = 10
 const ZOOM_SPEED = 1.05
 const FONT = 'Open Sans, sans-serif'
+const LINK_MARGIN = 2
+
+// Permet de décaler la zone de détection de la pointe de la flèche,
+// pour mieux correspondre avec son aspect visuel.
+// TODO: La pointe de la flèche est bien décalée au repos mais elle se
+// décale par erreur quand on la fait glisser.
+const END_HANDLE_OFFSET = 5
 
 const EVENT_MOUSE_DOWN = 'mousedown touchstart'
 const EVENT_MOUSE_UP = 'mouseup touchend'
@@ -96,27 +103,35 @@ class GraphicalNode {
         this.node.x = newX
         this.node.y = newY
 
-        this.x(newX)
-        this.y(newY)
+        this.kGroup.setAttrs({
+            x: newX,
+            y: newY
+        })
 
         this.updateLinks()
     }
 
     updateName(newName) {
-        const newWidth = this.kLabel.width() + NODE_LABEL_OFFSETX
-        const newHeight = this.kLabel.height() + NODE_LABEL_OFFSETY
+        const newWidth = this.kLabel.width() + NODE_LABEL_PADDINGX
+        const newHeight = this.kLabel.height() + NODE_LABEL_PADDINGY
 
         this.node.name = newName
 
-        this.kNode.width(newWidth)
-        this.kNode.height(newHeight)
+        this.kNode.setAttrs({
+            width: newWidth,
+            height: newHeight,
+        })
         // TODO: C'est dommage de devoir préciser la taille du `kGroup` alors
         // qu'elle pourrait se déduire des éléments qui le constituent.
-        this.kGroup.width(newWidth)
-        this.kGroup.height(newHeight)
+        this.kGroup.setAttrs({
+            width: newWidth,
+            height: newHeight
+        })
 
-        this.kLabel.x(newWidth * .5 - this.kLabel.width() * .5)
-        this.kLabel.y(newHeight * .5 - this.kLabel.height() * .5)
+        this.kLabel.setAttrs({
+            x: newWidth * .5 - this.kLabel.width() * .5,
+            y: newHeight * .5 - this.kLabel.height() * .5,
+        })
 
         this.updateLinks()
     }
@@ -198,40 +213,40 @@ class GraphicalLink {
         // Calcul de l'intersection avec le nœud opposé
         const gNodeOtherSide = isStartHandle ? this.gNodeTo : this.gNodeFrom
         const otherSide = computeArrowIntersectionFromPoints(gNodeOtherSide, newX, newY)
-
-        // TODO: On peut utiliser `setAttrs` pour configurer plusieurs attributs
-        // d'un coup, au lieu de le faire individuellement.
+        const dx = newX - otherSide.x
+        const dy = newY - otherSide.y
+        const arrowLength = Math.sqrt(dx ** 2 + dy ** 2)
 
         // Mise à jour de la flèche
-        // TODO: Les handles, qui permettent de déplacer la flèche, sont placés
-        // exactement sur le début et la fin de la flèche, ce qui fait qu'on
-        // peut prendre la flèche par erreur si on clique trop près du bord des
-        // nœuds. Il faut réfléchir à un positionnement plus adapté.
         if (isStartHandle) {
-            this.kStartHandle.x(newX)
-            this.kStartHandle.y(newY)
-            this.kArrow.points()[0] = newX
-            this.kArrow.points()[1] = newY
-            this.kArrow.points()[2] = otherSide.x
-            this.kArrow.points()[3] = otherSide.y
-            this.kEndHandle.x(otherSide.x)
-            this.kEndHandle.y(otherSide.y)
+            this.kStartHandle.setAttrs({
+                x: newX,
+                y: newY,
+            })
+            this.kArrow.setAttr('points', [newX, newY, otherSide.x, otherSide.y])
+            this.kEndHandle.setAttrs({
+                x: newX - (1 - (END_HANDLE_OFFSET / arrowLength)) * dx,
+                y: newY - (1 - (END_HANDLE_OFFSET / arrowLength)) * dy,
+            })
         } else {
-            this.kEndHandle.x(newX)
-            this.kEndHandle.y(newY)
-            this.kArrow.points()[0] = otherSide.x
-            this.kArrow.points()[1] = otherSide.y
-            this.kArrow.points()[2] = newX
-            this.kArrow.points()[3] = newY
-            this.kStartHandle.x(otherSide.x)
-            this.kStartHandle.y(otherSide.y)
+            this.kEndHandle.setAttrs({
+                x: newX,
+                y: newY,
+            })
+            this.kArrow.setAttr('points', [otherSide.x, otherSide.y, newX, newY])
+            this.kStartHandle.setAttrs({
+                x: otherSide.x,
+                y: otherSide.y,
+            })
         }
 
         // Mise à jour du label
         const halfLabelWidth = this.kLabel.width() * .5
         const halfLabelHeight = this.kLabel.height() * .5
-        this.kLabel.x((this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth)
-        this.kLabel.y((this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight)
+        this.kLabel.setAttrs({
+            x: (this.kStartHandle.x() + this.kEndHandle.x()) * .5 - halfLabelWidth,
+            y: (this.kStartHandle.y() + this.kEndHandle.y()) * .5 - halfLabelHeight,
+        })
     }
 
     setFromNode(fromNodeIndex, gNodeFrom) {
@@ -261,10 +276,10 @@ function computeArrowIntersectionFromPoints(gNodeStart, endX, endY) {
     let startY = gNodeStart.y() + gNodeStart.height() * .5
     let dx = endX - startX
     let dy = endY - startY
-    let tTop = (gNodeStart.y() - startY) / dy
-    let tBottom = (gNodeStart.y() + gNodeStart.height() - startY) / dy
-    let tRight = (gNodeStart.x() + gNodeStart.width() - startX) / dx
-    let tLeft = (gNodeStart.x() - startX) / dx
+    let tTop = (gNodeStart.y() - LINK_MARGIN - startY) / dy
+    let tBottom = (gNodeStart.y() + gNodeStart.height() + LINK_MARGIN - startY) / dy
+    let tRight = (gNodeStart.x() + gNodeStart.width() + LINK_MARGIN - startX) / dx
+    let tLeft = (gNodeStart.x() - LINK_MARGIN - startX) / dx
     let tCandidates = []
     if (tTop >= 0) tCandidates.push(tTop)
     if (tBottom >= 0) tCandidates.push(tBottom)
