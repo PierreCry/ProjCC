@@ -861,25 +861,9 @@ input:checked + .slider:before {
   
 /* Add styles to the form container */
 .form-container {
-    max-width: 300px;
+    width: 300px;
     padding: 10px;
     background-color: #47565C;
-}
-  
-/* Full-width input fields */
-.form-container input[type=text], .form-container input[type=password] {
-    width: 270px;
-    padding: 15px;
-    margin: 10px 0 22px 0;
-    border: none;
-    background: #f4f7f8;
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-  
-/* When the inputs get focus, do something */
-.form-container input[type=text]:focus, .form-container input[type=password]:focus {
-    background-color: #ddd;
-    outline: none;
 }
   
 /* Set a style for the submit/login button */

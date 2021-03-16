@@ -90,8 +90,10 @@ function reply_click(clicked_id){
     num--;
     var newid = 't'.concat(num.toString());
 
-    document.getElementById(newid).click();
-    alert(newid);
+    //openCity(eventt,'2');
+    //document.getElementById(newid).click();
+    
+    //alert(newid);
 }
 
 var test = 0;
@@ -113,13 +115,7 @@ function closeForm() {
 }
 
 function validate() {
-    var str = document.getElementById("mdp").value;
-    if (str == "123") {
-        document.location.href="Interface_correcteur.html";
-    }
-    else {
-        alert("Mot de passe incorrect");
-    }
+    document.location.href="index.html";
 }
 
 $(document).ready(function() {
