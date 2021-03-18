@@ -1,17 +1,34 @@
-public abstract class MapItem {
+public abstract class MapItem{
+   
 	protected State state;
-	
-	enum State {
-		CORRECT,
-		WRONG,
-		DEFAULT
-	}
+    protected double weight;
+    protected int occurrence;
 
-	public State getState() {
-		return state;
-	}
-	
-	public void setState(State correct) {
-		this.state = correct;
-	}
+    enum State{
+      
+    	CORRECT,
+        WRONG,
+        DEFAULT
+    }
+
+    public MapItem(){
+       
+    	state = State.DEFAULT;
+        weight = 1;
+        occurrence = 0;
+    }
+
+    public State getState(){
+        
+    	return state;
+    }
+
+    public void setState(State state){
+       
+    	this.state = state;
+    }
+    
+    public void IncrementOccurrence() {
+    	occurrence++;
+    }
 }

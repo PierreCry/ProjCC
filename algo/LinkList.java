@@ -1,65 +1,94 @@
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class LinkList {
-	private ArrayList<Link> links;
-	private ArrayList<String> verbs;
 	
+	private ArrayList<Link> links;
+	private ArrayList<ArrayList<String>> globalLinkNames;
+	
+	@SuppressWarnings("serial")
 	public LinkList() {
+		
 		links = new ArrayList<>();
-		verbs = new ArrayList<>();
+		globalLinkNames = new ArrayList<ArrayList<String>>() {{
+			new ArrayList<String>();
+			new ArrayList<String>();
+			new ArrayList<String>();
+			}};
 	}
 	
 	public LinkList(ArrayList<Link> links) {
-		this.links = links;
-		this.verbs = new ArrayList<>();
 		
-		for(Link lin : this.links) {
-			verbs.add(lin.getVerb());
-		}
-	}
+		this.links = links;
+		
+		for(Link l : links) {
 
-	public ArrayList<Link> getLinks() {
-		return links;
-	}
-
-	public boolean containsGeneralized(Link lin) {
-		for(Link link : links) {
-			if(lin.getVerb().equals(link.getVerb())) {
-				if(link.getPreLabel().getKeywords().equals(lin.getPreLabel().getKeywords()) &&
-						link.getPostLabel().getKeywords().equals(lin.getPostLabel().getKeywords())) {
-					return true;
-				}
+			ArrayList<ArrayList<String>> T = l.getLink();
+		
+			for(int i=0 ; i<3 ; i++) {
 				
-				if(link.getPreLabel().getSynonyms().contains(lin.getPreLabel().getKeywords()) &&
-						link.getPostLabel().getSynonyms().contains(lin.getPostLabel().getKeywords())) {
-					return true;
+				ArrayList<String> currentList = (ArrayList<String>) T.get(i);
+				
+				for(String s : currentList) {
+				
+					((ArrayList<String>) globalLinkNames.get(i)).add(s);
 				}
 			}
 		}
-
-		return false;
 	}
 	
-	public Link getLink(int i) {
-		return links.get(i);
+	public void addLink(Link link) {
+		
+		links.add(link);
+		
+		ArrayList<ArrayList<String>> T = link.getLink();
+		
+		for(int i=0 ; i<3 ; i++) {
+			ArrayList<String> currentList = (ArrayList<String>) T.get(i);
+			
+			for(String s : currentList) {
+			
+				((ArrayList<String>) globalLinkNames.get(i)).add(s);
+			}
+		}
 	}
 	
-	public String getVerb(int i) {
-		return verbs.get(i);
-	}
+	public boolean contains(String preLabelTest, String verbTest, String postLabelTest) {
 
-	public ArrayList<String> getVerbs() {
-		return verbs;
+		Collator collator = Collator.getInstance(Locale.FRENCH);
+		collator.setStrength(Collator.PRIMARY);
+		
+		boolean flagPre = false;
+		boolean flagVerb = false;
+		boolean flagPost = false;
+		
+		for(String s : globalLinkNames.get(0)) {
+			
+			if(collator.equals(s, preLabelTest))
+				flagPre = true;
+		}
+		
+		for(String s : globalLinkNames.get(1)) {
+			
+			if(collator.equals(s, verbTest))
+				flagVerb = true;
+		}
+		
+		for(String s : globalLinkNames.get(2)) {
+			
+			if(collator.equals(s, postLabelTest))
+				flagPost = true;
+		}
+		
+		if(flagPre && flagVerb && flagPost) 
+			return true;
+		
+		return false;		
 	}
-
-	public void setVerbs(ArrayList<String> verbs) {
-		this.verbs = verbs;
-	}
-
-	public void setLinks(ArrayList<Link> links) {
-		this.links = links;
-	}
-
 	
+	public ArrayList<Link> getLinks(){
+		
+		return links;
+	}
 }
- 

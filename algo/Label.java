@@ -1,25 +1,32 @@
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class Label extends MapItem{
-	private String keywords;
-	private ArrayList<String> synonyms;
-	
-	
-	public Label(String keywords) {
-		this.keywords = keywords;
-		this.state = State.DEFAULT;
-		buildSynonyms();
-	}
+    private ArrayList<String> keywords;
+    
+    public Label(ArrayList<String> keywords) {
+    	
+    	super();
+    	this.keywords = Normalizer.ToLowerCase(keywords);
+    }
+    
+    public boolean contains(String keyword) {
+    	
+    	Collator collator = Collator.getInstance(Locale.FRENCH);
+    	collator.setStrength(Collator.PRIMARY);
+    	
+    	for(String s : keywords) {
+    		
+    		if(collator.equals(s, keyword))
+    			return true;
+    	}
+    	
+    	return false;
+    }
 
-	private void buildSynonyms() {
-		// algo de génération de synonymes
-	}
-	
-	public String getKeywords() {
+	public ArrayList<String> getKeywords() {
+		
 		return keywords;
-	}
-
-	public ArrayList<String> getSynonyms() {
-		return synonyms;
 	}
 }
