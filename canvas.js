@@ -352,18 +352,12 @@ class CanvasMap {
             if (gNodeClicked !== this.selectedGNode) {
                 if (this.selectedGNode) {
                     // On déselectionne le nœud précédemment sélectionné
-                    this.selectedGNode.setSelected(false)
-                    this.selectedGNode = undefined
-                    this._hideFloatingToolbar()
+                    this._unselectGNode(this.selectedGNode)
                 }
 
                 if (gNodeClicked) {
                     // On sélectionne le nouveau nœud
-                    gNodeClicked.setSelected(true)
-                    this.selectedGNode = gNodeClicked
-
-                    this._moveFloatingBarToNode(gNodeClicked)
-                    this._showFloatingToolbar()
+                    this._selectGNode(gNodeClicked)
                 }
 
                 this.kStage.draw()
@@ -462,8 +456,7 @@ class CanvasMap {
                 removeFromArray(this.map.links, gLink.link)
             }
 
-            this._hideFloatingToolbar()
-            this.selectedGNode = undefined
+            this._unselectGNode(this.selectedGNode)
             this.kStage.draw()
         })
 
@@ -473,6 +466,7 @@ class CanvasMap {
         let buttonsElt = document.querySelector('.icon-bar').children
         let nodeButtonElt = buttonsElt[1]
         let linkButtonElt = buttonsElt[2]
+        let recenterButtonElt = buttonsElt[3]
 
         linkButtonElt.addEventListener('click', () => {
             this.state = STATE_CREATING_LINK
@@ -485,6 +479,10 @@ class CanvasMap {
                 name: 'Concept'
             }
             this.addGraphicalNode(node)
+        })
+
+        recenterButtonElt.addEventListener('click', () => {
+            this._recenterMap();
         })
 
         window.addEventListener('resize', () => {
@@ -551,10 +549,6 @@ class CanvasMap {
 
         // On met les handles sur leur propre layer quand on les drag pour
         // qu'ils ne gênent pas lors de la détection du nœud intersecté
-        // TODO: Il faut empêcher de pouvoir drag un lien si on est dans l'état
-        // `STATE_CREATING_LINK`, car sinon il se détruit si on le relâche dans
-        // le vide (puisque c'est ce qu'on veut faire si on relâche un lien
-        // en cours de création).
         const onHandleDragStart = e => {
             e.target.moveTo(this.kDragLayer)
             gLink.kGroup.moveToTop()
@@ -687,6 +681,41 @@ class CanvasMap {
         this.kMainLayer.draw()
     }
 
+    _recenterMap() {
+        this._unselectGNode(this.selectedGNode)
+
+        let xMin = Number.MAX_VALUE
+        let yMin = Number.MAX_VALUE
+        let xMax = Number.MIN_VALUE
+        let yMax = Number.MIN_VALUE
+
+        for (const gNode of this.gNodes) {
+            xMin = Math.min(xMin, gNode.x())
+            yMin = Math.min(yMin, gNode.y())
+            xMax = Math.max(xMax, gNode.x() + gNode.width())
+            yMax = Math.max(yMax, gNode.y() + gNode.height())
+        }
+
+        this.kStage.position({
+            x: -(xMin + xMax) * this.kStage.scale().x / 2 + this.kStage.width() / 2,
+            y: -(yMin + yMax) * this.kStage.scale().y / 2 + this.kStage.height() / 2,
+        })
+        this.kStage.draw()
+    }
+
+    _selectGNode(gNode) {
+        gNode.setSelected(true)
+        this.selectedGNode = gNode
+        this._moveFloatingBarToNode(gNode)
+        this._showFloatingToolbar()
+    }
+
+    _unselectGNode(gNode) {
+        if (gNode) gNode.setSelected(false)
+        this.selectedGNode = undefined
+        this._hideFloatingToolbar()
+    }
+
     _showFloatingToolbar() {
         this.floatingBarElt.style.display = 'block'
     }
@@ -713,6 +742,8 @@ class CanvasMap {
 function createCanvasMap(container, map = { nodes: [], links: [] }) {
     let canvasMap = new CanvasMap(container, map)
 
+    // TODO: Peut-être qu'on pourrait faire tout ça dans le constructeur de
+    // `CanvasMap`.
     // Initialisation de la map
     for (const node of map.nodes) {
         canvasMap.addGraphicalNode(node, false)
