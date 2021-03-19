@@ -326,6 +326,7 @@ class CanvasMap {
         this.kStage.add(this.kDragLayer)
 
         this.gNodes = []
+        this.gLinks = []
 
         this.kStage.scale({ x: 1.5, y: 1.5 })
         this.kStage.draw()
@@ -519,6 +520,7 @@ class CanvasMap {
     addGraphicalLink(link, redrawLayer = true) {
         const gLink = this._createGraphicalLink(link)
 
+        this.gLinks.push(gLink)
         this.kMainLayer.add(gLink.kGroup)
         if (redrawLayer) this.kMainLayer.draw()
 
@@ -712,7 +714,7 @@ class CanvasMap {
 
 function createCanvasMap(container, map = { nodes: [], links: [] }) {
     let canvasMap = new CanvasMap(container, map)
-
+    
     // Initialisation de la map
     for (const node of map.nodes) {
         canvasMap.addGraphicalNode(node, false)
@@ -737,14 +739,9 @@ function createCanvasMap(container, map = { nodes: [], links: [] }) {
             }
         }
     }
-}
 
-window.addEventListener('DOMContentLoaded', () => {
-    const mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,"to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d'eau","x":138.22998992919986,"y":26.46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,"y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}`
-    const map = JSON.parse(mapJSON)
-    const container = document.getElementById('canvas-container1')
-    createCanvasMap(container, map)
-})
+    return canvasMap;
+}
 
 function konvaHandleTextInput(kText, onInput, bold = false) {
     // Inspiré de https://konvajs.org/docs/sandbox/Editable_Text.html

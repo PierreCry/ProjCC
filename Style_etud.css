@@ -236,6 +236,14 @@ li .active:active {
     transition: 0.1s;
 }
 
+#down {
+    display: none;
+}
+
+li:hover #down {
+    display: block;
+}
+
 /***************************************************/
 
 .button {
