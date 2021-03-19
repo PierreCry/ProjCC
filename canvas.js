@@ -34,7 +34,6 @@ class GraphicalNode {
         this.node = node
         this.index = index
         this.gLinks = []
-        this.isSelected = false
 
         // On met tous les éléments graphiques constituant le nœud dans un
         // `Konva.Group`.
@@ -95,7 +94,6 @@ class GraphicalNode {
     }
 
     setSelected(selected) {
-        this.isSelected = selected
         this.kNode.strokeEnabled(selected)
     }
 
@@ -153,18 +151,18 @@ class GraphicalLink {
         // graphiques dans un `Konva.Group`.
         this.kGroup = new Konva.Group()
 
-        let kStartHandle = new Konva.Circle({
+        this.kStartHandle = new Konva.Circle({
             radius: LINK_HANDLE_RADIUS,
             // fill: 'red',
             draggable: true,
         })
-        let kEndHandle = new Konva.Circle({
+        this.kEndHandle = new Konva.Circle({
             radius: LINK_HANDLE_RADIUS,
             // fill: 'blue',
             draggable: true,
         })
 
-        let kArrow = new Konva.Arrow({
+        this.kArrow = new Konva.Arrow({
             fill: '#4e6ea5',
             stroke: '#4e6ea5',
             lineCap: 'round',
@@ -174,24 +172,26 @@ class GraphicalLink {
             points: [0, 0, 0, 0]
         })
 
-        let kLabel = new Konva.Label()
-        kLabel.add(new Konva.Tag({
+        this.kLabel = new Konva.Label()
+        this.kLabel.add(new Konva.Tag({
             fill: '#ffffffaa',
-            cornerRadius: 2
+            cornerRadius: 2,
+            stroke: '#5585f2',
+            strokeWidth: 1,
+            strokeEnabled: false,
         }))
         let kText = new Konva.Text({
             text: link.verb,
-            padding: 2,
+            padding: 3,
             fontFamily: FONT
         })
-        kLabel.add(kText)
+        this.kLabel.add(kText)
 
-        this.kGroup.add(kStartHandle, kEndHandle, kArrow, kLabel)
-        this.kStartHandle = kStartHandle
-        this.kEndHandle = kEndHandle
-        this.kArrow = kArrow
-        this.kLabel = kLabel
-        this.kText = kText
+        this.kGroup.add(this.kStartHandle, this.kEndHandle, this.kArrow, this.kLabel)
+    }
+
+    setSelected(selected) {
+        this.kLabel.getTag().strokeEnabled(selected)
     }
 
     updateHandles() {
@@ -305,7 +305,7 @@ class CanvasMap {
         this.container = container
         this.map = map
         this.state = STATE_DEFAULT
-        this.selectedGNode = undefined
+        this.selectedGObject = undefined
         this.kDraggingElement = undefined
 
         this.kStage = new Konva.Stage({
@@ -332,68 +332,21 @@ class CanvasMap {
         this.kStage.draw()
 
         this.kStage.on(EVENT_MOUSE_DOWN, e => {
+            // Ce callback est appelé quand un clic est détecté sur le kStage.
+            // La gestion des clics sur les différents objets se fait dans leurs
+            // callbacks respectifs. Si un objet veut "court-circuiter" la
+            // gestion par défaut d'un clic (qui est faite ici), il lui suffit
+            // d'annuler la propagation de l'événement. On considère donc que si
+            // on arrive ici, c'est qu'aucun objet n'a géré le clic.
+
+            this._unselectObject()
+
             // On active le drag du stage si on a cliqué dans le vide
             if (e.target === this.kStage) {
                 this.kStage.startDrag()
             }
 
-            // On récupère le `kGroup` d'un `GraphicalNode` qu'on a
-            // potentiellement intersecté.
-            const gNodeKGroupClicked = e.target.findAncestor('.graphicalNode')
-            // On en extrait le `gNode` à partir de l'indice stocké dans le
-            // groupe.
-            const gNodeIndex = gNodeKGroupClicked ?
-                gNodeKGroupClicked.getAttr('_gNodeIndex') :
-                -1
-            const gNodeClicked = gNodeIndex >= 0 ?
-                this.gNodes[gNodeIndex] :
-                undefined
-
-            // Gestion de la sélection d'un nœud
-            if (gNodeClicked !== this.selectedGNode) {
-                if (this.selectedGNode) {
-                    // On déselectionne le nœud précédemment sélectionné
-                    this.selectedGNode.setSelected(false)
-                    this.selectedGNode = undefined
-                    this._hideFloatingToolbar()
-                }
-
-                if (gNodeClicked) {
-                    // On sélectionne le nouveau nœud
-                    gNodeClicked.setSelected(true)
-                    this.selectedGNode = gNodeClicked
-
-                    this._moveFloatingBarToNode(gNodeClicked)
-                    this._showFloatingToolbar()
-                }
-
-                this.kStage.draw()
-            }
-
-            // Gestion du clic sur un nœud
-            if (gNodeClicked) {
-                if (this.state === STATE_CREATING_LINK) {
-                    const link = {
-                        from: gNodeClicked.index,
-                        to: -1,
-                        verb: 'Lien',
-                    }
-                    const gLink = this.addGraphicalLink(link, false)
-                    gNodeClicked.gLinks.push(gLink)
-
-                    const pointerPos = getAbsolutePointerPosition(this.kStage)
-                    gLink.moveHandle(false, pointerPos.x, pointerPos.y)
-                    gLink.kEndHandle.startDrag()
-                    this.kDraggingElement = gLink.kEndHandle
-                } else {
-                    // On met le nœud au premier plan et on active le drag.
-                    gNodeClicked.kGroup.moveToTop()
-                    gNodeClicked.kGroup.startDrag()
-                    this.kDraggingElement = gNodeClicked.kGroup
-                }
-            } else if (this.state === STATE_CREATING_LINK) {
-                // On repasse en mode normal si on n'a pas cliqué sur un nœud et
-                // qu'on est en mode création de lien.
+            if (this.state === STATE_CREATING_LINK) {
                 this.state = STATE_DEFAULT
             }
         })
@@ -419,8 +372,8 @@ class CanvasMap {
             }
             this.kStage.position(newPos)
 
-            if (this.selectedGNode) {
-                this._moveFloatingBarToNode(this.selectedGNode)
+            if (this.selectedGObject) {
+                this._moveFloatingBarTo(this.selectedGObject)
             }
 
             this.kStage.batchDraw()
@@ -431,41 +384,42 @@ class CanvasMap {
         let deleteNodeButtonElt = this.floatingBarElt.children[0]
 
         deleteNodeButtonElt.addEventListener('click', () => {
-            if (!this.selectedGNode) return
+            if (!this.selectedGObject) return
 
-            // On supprime le nœud actuellement sélectionné
-            // TODO: S'assurer que `destroy` supprime aussi les event
-            // listeners.
-            this.selectedGNode.kGroup.destroy()
-            // TODO: Il faut supprimer les nœuds dans les deux tableaux mais
-            // si on fait ça, il faut remettre à jour tous les indices pour
-            // tous les liens. Pour l'instant, on met juste les nœuds à
-            // `undefined` pour ne pas invalider les indices.
-            this.gNodes[this.selectedGNode.index] = undefined
-            this.map.nodes[this.selectedGNode.index] = undefined
-            // removeFromArray(this.gNodes, this.selectedGNode)
-            // removeFromArray(this.map.nodes, this.selectedGNode.node)
+            let gObjectToDelete = this.selectedGObject
+            this._unselectObject()
 
-            // On supprime tous les liens connectés à ce nœud
-            for (let gLinkIndex = this.selectedGNode.gLinks.length - 1;
-                 gLinkIndex >= 0;
-                 --gLinkIndex
-            ) {
-                let gLink = this.selectedGNode.gLinks[gLinkIndex]
-                gLink.kGroup.destroy()
-                // On supprime le lien des nœuds connectés
-                if (gLink.gNodeFrom) {
-                    removeFromArray(gLink.gNodeFrom.gLinks, gLink)
+            if (gObjectToDelete instanceof GraphicalNode) {
+                // On supprime le nœud actuellement sélectionné
+                // TODO: S'assurer que `destroy` supprime aussi les event
+                // listeners.
+                gObjectToDelete.kGroup.destroy()
+
+                // TODO: Il faut supprimer les nœuds dans les deux tableaux mais
+                // si on fait ça, il faut remettre à jour tous les indices pour
+                // tous les liens. Pour l'instant, on met juste les nœuds à
+                // `undefined` pour ne pas invalider les indices.
+                this.gNodes[gObjectToDelete.index] = undefined
+                this.map.nodes[gObjectToDelete.index] = undefined
+                // removeFromArray(this.gNodes, gObjectToDelete)
+                // removeFromArray(this.map.nodes, gObjectToDelete.node)
+
+                // On supprime tous les liens connectés à ce nœud
+                for (let gLinkIndex = gObjectToDelete.gLinks.length - 1;
+                     gLinkIndex >= 0;
+                     --gLinkIndex
+                ) {
+                    let gLink = gObjectToDelete.gLinks[gLinkIndex]
+                    this._deleteGLink(gLink)
+                    removeFromArray(this.map.links, gLink.link)
                 }
-                if (gLink.gNodeTo) {
-                    removeFromArray(gLink.gNodeTo.gLinks, gLink)
-                }
-                removeFromArray(this.map.links, gLink.link)
+            } else if (gObjectToDelete instanceof GraphicalLink) {
+                // On supprime le lien actuellement sélectionné
+                this._deleteGLink(gObjectToDelete)
+                removeFromArray(this.map.links, gObjectToDelete.link)
             }
 
-            this._hideFloatingToolbar()
-            this.selectedGNode = undefined
-            this.kStage.draw()
+            this.kMainLayer.draw()
         })
 
         // Configuration des boutons de l'interface
@@ -474,6 +428,7 @@ class CanvasMap {
         let buttonsElt = document.querySelector('.icon-bar').children
         let nodeButtonElt = buttonsElt[1]
         let linkButtonElt = buttonsElt[2]
+        let recenterButtonElt = buttonsElt[3]
 
         linkButtonElt.addEventListener('click', () => {
             this.state = STATE_CREATING_LINK
@@ -486,6 +441,10 @@ class CanvasMap {
                 name: 'Concept'
             }
             this.addGraphicalNode(node)
+        })
+
+        recenterButtonElt.addEventListener('click', () => {
+            this._recenterMap();
         })
 
         window.addEventListener('resize', () => {
@@ -534,13 +493,55 @@ class CanvasMap {
         gNode.kGroup.on(EVENT_DOUBLE_CLICK, () => {
             konvaHandleTextInput(gNode.kText, newValue => {
                 gNode.updateName(newValue)
-                this._moveFloatingBarToNode(gNode)
+                this._moveFloatingBarTo(gNode)
             }, true)
+        })
+
+        gNode.kGroup.on(EVENT_MOUSE_DOWN, e => {
+            const gNodeClicked = gNode
+
+            // On désélectionne l'objet précédemment sélectionné
+            this._unselectObject()
+
+            if (this.state === STATE_CREATING_LINK) {
+                const link = {
+                    from: gNodeClicked.index,
+                    to: -1,
+                    verb: 'Lien',
+                }
+                const gLink = this.addGraphicalLink(link, false)
+                gNodeClicked.gLinks.push(gLink)
+
+                const pointerPos = getAbsolutePointerPosition(this.kStage)
+                gLink.moveHandle(false, pointerPos.x, pointerPos.y)
+                gLink.kEndHandle.startDrag()
+                this.kDraggingElement = gLink.kEndHandle
+            } else {
+                // On sélectionne le nouveau nœud
+                this._selectObject(gNodeClicked)
+
+                this.kMainLayer.draw()
+
+                // On met le nœud au premier plan et on active le drag.
+                gNodeClicked.kGroup.moveToTop()
+                gNodeClicked.kGroup.startDrag()
+                this.kDraggingElement = gNodeClicked.kGroup
+
+                // Il ne faut pas appeler `this.kMainLayer.draw` après ce point
+                // car sinon le drag-and-drop ne fonctionne pas correctement
+                // dans le cas où on clique sur un nœud et qu'on relâche la
+                // souris *sans avoir bougé*. De même, le double-clic ne serait
+                // pas détecté pour une raison inconnue.
+            }
+
+            // On a géré le clic sur le nœud, on ne veut donc pas que le clic
+            // remonte jusqu'au kStage.
+            e.cancelBubble = true
         })
 
         gNode.kGroup.on('dragmove', () => {
             gNode.move(gNode.x(), gNode.y())
-            this._moveFloatingBarToNode(gNode)
+            this._moveFloatingBarTo(gNode)
         })
 
         return gNode
@@ -553,10 +554,6 @@ class CanvasMap {
 
         // On met les handles sur leur propre layer quand on les drag pour
         // qu'ils ne gênent pas lors de la détection du nœud intersecté
-        // TODO: Il faut empêcher de pouvoir drag un lien si on est dans l'état
-        // `STATE_CREATING_LINK`, car sinon il se détruit si on le relâche dans
-        // le vide (puisque c'est ce qu'on veut faire si on relâche un lien
-        // en cours de création).
         const onHandleDragStart = e => {
             e.target.moveTo(this.kDragLayer)
             gLink.kGroup.moveToTop()
@@ -581,10 +578,19 @@ class CanvasMap {
         })
 
         gLink.kLabel.on(EVENT_DOUBLE_CLICK, () => {
-            konvaHandleTextInput(gLink.kText, newValue => {
+            konvaHandleTextInput(gLink.kLabel.getText(), newValue => {
                 gLink.updateVerb(newValue)
                 this.kMainLayer.batchDraw()
             })
+        })
+
+        gLink.kLabel.on(EVENT_MOUSE_DOWN, e => {
+            this._unselectObject()
+            this._selectObject(gLink)
+
+            this.kMainLayer.draw()
+
+            e.cancelBubble = true
         })
 
         // Position initiale
@@ -664,13 +670,12 @@ class CanvasMap {
         } else if (this.state === STATE_CREATING_LINK) {
             // On est en train de créer un lien mais on n'a pas trouvé de nœud
             // cible, on détruit donc le lien en cours de création
-            gLink.kGroup.destroy()
-            // On le supprime du nœud
+
             // TODO: Plutôt que de supprimer le lien après coup (quand on se
             // rend compte qu'il n'a pas de destination), on pourrait
             // simplement ne pas l'ajouter en premier lieu et l'ajouter
             // seulement quand on a trouvé un nœud destination.
-            removeFromArray(this.gNodes[gLink.link.from].gLinks, gLink)
+            this._deleteGLink(gLink)
 
             this.state = STATE_DEFAULT
 
@@ -689,6 +694,60 @@ class CanvasMap {
         this.kMainLayer.draw()
     }
 
+    _deleteGLink(gLink) {
+        gLink.kGroup.destroy()
+
+        // On supprime le lien du nœud de départ et d'arrivée s'ils existent
+        if (gLink.gNodeFrom) removeFromArray(gLink.gNodeFrom.gLinks, gLink)
+        if (gLink.gNodeTo) removeFromArray(gLink.gNodeTo.gLinks, gLink)
+    }
+
+    _recenterMap() {
+        this._unselectObject()
+
+        let xMin = Number.MAX_VALUE
+        let yMin = Number.MAX_VALUE
+        let xMax = Number.MIN_VALUE
+        let yMax = Number.MIN_VALUE
+
+        for (const gNode of this.gNodes) {
+            if (gNode) {
+                xMin = Math.min(xMin, gNode.x())
+                yMin = Math.min(yMin, gNode.y())
+                xMax = Math.max(xMax, gNode.x() + gNode.width())
+                yMax = Math.max(yMax, gNode.y() + gNode.height())
+            }
+        }
+
+        this.kStage.position({
+            x: -(xMin + xMax) * this.kStage.scale().x / 2 + this.kStage.width() / 2,
+            y: -(yMin + yMax) * this.kStage.scale().y / 2 + this.kStage.height() / 2,
+        })
+        this.kStage.draw()
+    }
+
+    /**
+     * Sélectionne l'objet demandé et déplace la barre flottante à sa position.
+     *
+     * @param {GraphicalNode|GraphicalLink} gObject L'objet à sélectionner.
+     */
+    _selectObject(gObject) {
+        gObject.setSelected(true)
+        this.selectedGObject = gObject
+        this._moveFloatingBarTo(gObject)
+        this._showFloatingToolbar()
+    }
+
+    /**
+     * Désélectionne l'objet actuellement sélectionné et masque la barre
+     * flottante.
+     */
+    _unselectObject() {
+        if (this.selectedGObject) this.selectedGObject.setSelected(false)
+        this.selectedGObject = undefined
+        this._hideFloatingToolbar()
+    }
+
     _showFloatingToolbar() {
         this.floatingBarElt.style.display = 'block'
     }
@@ -697,13 +756,32 @@ class CanvasMap {
         this.floatingBarElt.style.display = 'none'
     }
 
-    _moveFloatingBarToNode(gNode) {
+    _moveFloatingBarTo(gObject) {
         // TODO: Récupérer la largeur dynamiquement.
         const floatingBarWidth = 40
-        let pos = gNode.kGroup.absolutePosition()
+        let pos
+        let objectWidth
+
+        // On récupère la position et la taille de l'objet en fonction de son
+        // type. On ne crée pas de méthode abstraite car une méthode `width` sur
+        // un `GraphicalLink` renverrait probablement la largeur de la *flèche*,
+        // mais ici on a besoin de la largeur du *texte*. Ça n'a donc pas de
+        // sens de créer une telle méthode car les éventuels autres utilisateurs
+        // de la classe s'attendraient à ce qu'une méthode `width` renvoie la
+        // largeur de la flèche, mais dans ce cas précis, ce n'est pas cette
+        // largeur là qu'on veut. On doit donc aller chercher manuellement
+        // l'info dont on a besoin en fonction du type de l'objet.
+        if (gObject instanceof GraphicalNode) {
+            pos = gObject.kGroup.absolutePosition()
+            objectWidth = gObject.width()
+        } else if (gObject instanceof GraphicalLink) {
+            pos = gObject.kLabel.absolutePosition()
+            objectWidth = gObject.kLabel.width()
+        }
+
         pos.x +=
             this.container.offsetLeft +
-            gNode.width() * this.kStage.scaleX() / 2 -
+            objectWidth * this.kStage.scaleX() / 2 -
             floatingBarWidth / 2
         pos.y += this.container.offsetTop - 50
 
@@ -714,7 +792,9 @@ class CanvasMap {
 
 function createCanvasMap(container, map = { nodes: [], links: [] }) {
     let canvasMap = new CanvasMap(container, map)
-    
+
+    // TODO: Peut-être qu'on pourrait faire tout ça dans le constructeur de
+    // `CanvasMap`.
     // Initialisation de la map
     for (const node of map.nodes) {
         canvasMap.addGraphicalNode(node, false)

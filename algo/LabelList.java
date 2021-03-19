@@ -1,54 +1,80 @@
 import java.util.ArrayList;
+import java.util.Locale;
+import java.text.Collator;
 
 public class LabelList {
+	
 	private ArrayList<Label> labels;
-	private ArrayList<String> labelNames;
+	private ArrayList<String> globalLabelNames;
 	
 	public LabelList() {
+		
 		labels = new ArrayList<>();
-		labelNames = new ArrayList<>();
+		globalLabelNames = new ArrayList<>();
 	}
 	
 	public LabelList(ArrayList<Label> labels) {
+		
 		this.labels = labels;
-		labelNames = new ArrayList<>();
-		for(Label lab : this.labels) {
-			labelNames.add(lab.getKeywords());
+
+		globalLabelNames = new ArrayList<>();
+		
+		for(Label l : labels) {
+			
+			globalLabelNames.addAll(l.getKeywords());
 		}
 	}
 	
-	public boolean containsGeneralized(Label label){
-		if(labelNames.contains(label.getKeywords())) return true;
-
-		for(String lab : labelNames){
-			if(label.getSynonyms().contains(lab))
+	public void addLabel(Label label) {
+		
+		labels.add(label);
+		
+		globalLabelNames.addAll(label.getKeywords());
+	}
+	
+	public boolean contains(String label) {
+		
+		Collator collator = Collator.getInstance(Locale.FRENCH);
+		collator.setStrength(Collator.PRIMARY);
+		
+		label = label.toLowerCase();
+		
+		for(String s : globalLabelNames) {
+			
+			if(collator.equals(s, label))
 				return true;
 		}
-
+		
 		return false;
 	}
 	
-	public Label getLabel(int i) {
-		return labels.get(i);
+	public boolean contains(ArrayList<String> labels) {
+		
+		Collator collator = Collator.getInstance(Locale.FRENCH);
+		collator.setStrength(Collator.PRIMARY);
+		
+		for(String label : labels) {
+			label = label.toLowerCase();
+			
+			
+			for(Label refLab : this.labels) {
+				
+				for(String s : refLab.getKeywords()) {
+					
+					if(collator.equals(s, label)) {
+						
+						refLab.IncrementOccurrence();
+						return true;
+					}
+				}
+			}
+		}
+			
+		return false;
 	}
 	
-	public String getKeywords(int i) {
-		return labelNames.get(i);
-	}
-
-	public ArrayList<Label> getLabels() {
+	public ArrayList<Label> getLabels(){
+		
 		return labels;
-	}
-
-	public void setLabels(ArrayList<Label> labels) {
-		this.labels = labels;
-	}
-
-	public ArrayList<String> getLabelNames() {
-		return labelNames;
-	}
-
-	public void setLabelNames(ArrayList<String> labelNames) {
-		this.labelNames = labelNames;
 	}
 }
