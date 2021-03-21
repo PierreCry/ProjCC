@@ -29,15 +29,13 @@
     <ul>
         <li><a class="t1 active" href="#Aide" onclick="openNav()">Aide</a></li>
         <li><a class="t1" href="#Nouveau" onclick="New()">Nouveau</a></li>
-        <li><a class="t1" href="#fermer">Fermer</a></li>
-        <li><a class="t1" href="#Enregistrersous">Enregistrer sous</a></li>
+        <li><a class="t1" href="#Exporter">Exporter</a></li>
         <li><a class="t1" id="up" href="#Importer">Importer</a>
             <ul id="down">
                 <li><input class="t1" type="file" onchange="importEtud(this)" accept=".json" multiple></li>
             </ul>
         </li>
-        <li><a class="t1" href="#Exporter" onclick="exportEtud()">Exporter</a></li>
-        <li><a class="t1" href="#Imprimer">Imprimer</a></li>
+        <li><a class="t1" href="#Télécharger" onclick="exportEtud()">Télécharger</a></li>
         <li style="float:right"><b class="t4 fas fa-sign-out-alt" onclick="openForm()"></b></li>
 
         <li style="float:right">
@@ -50,7 +48,6 @@
         </li>
         <li style="float:right"><b class="t2 fas fa-redo" href="#redo_black"></b></li>
         <li style="float:right"><b class="t2 fas fa-undo" href="#undo_black"></b></li>
-        <li style="float:right"><button class="button button1" href="#run"> <span class="t8">Compiler</span></button></li>
     </ul>
 
     <div class="form-popup" id="myForm">
@@ -99,7 +96,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 11</footer>
+    <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 12</footer>
 
     <script>
         document.getElementById("t1").click();
