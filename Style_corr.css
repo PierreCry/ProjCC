@@ -219,6 +219,11 @@ li a:active {
     transition: 0.1s;
 }
 
+li a:gestion {
+    transform: translateY(1px);
+    transition: 0.1s;
+}
+
 li b {
     display: block;
     color: #000000;
@@ -252,9 +257,21 @@ li .active {
     border: none;
 }
 
+li .gestion {
+    background-color: #7a1919;
+    color: #f4f7f8;
+    border: none;
+}
+
 li .active:hover {
     background-color: #192c33;
     color: #c7c7c7;
+    border: none;
+}
+
+li .gestion:hover {
+    background-color: #d1b227;
+    color: #f4f7f8;
     border: none;
 }
 
@@ -315,6 +332,61 @@ li .active:active {
 }
 
 .button1 {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/***************************************************/
+/*Button 2*/
+/***************************************************/
+
+.button2 {
+    display: inline-block;
+    background-color: #f4f7f8;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 20px;
+    width: 120px;
+    height: 30px;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin: 5px;
+    margin-top: 3px;
+}
+
+.button2 span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+.button2 span:after {
+    content: "\f14a";
+    font-family: FontAwesome;
+    padding-left: 10px;
+    padding-right: 0px;
+    margin: 0px;
+    opacity: 0;
+    top: 0;
+    right: -30px;
+    transition: 0.5s;
+}
+
+.button2:hover span {
+    padding-right: 10px;
+}
+
+.button2:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.button2:active {
+    transform: translateY(3px);
+}
+
+.button3 {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
