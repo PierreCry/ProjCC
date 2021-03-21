@@ -50,15 +50,6 @@
         <li style="float:right"><b class="t2 fas fa-undo" href="#undo_black"></b></li>
     </ul>
 
-    <div class="form-popup" id="myForm">
-        <form class="form-container">
-            <label for="psw"><a class="t9">Voulez-vous vous déconnecter ?</a></label>
-        
-            <button type="button" class="btn" onclick="validate()">Oui</button>
-            <button type="button" class="btn cancel" onclick="closeForm()">Non</button>
-        </form>
-    </div>
-
     <div id="myNav" class="overlay">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div class="overlay-content">
@@ -68,7 +59,7 @@
 
     <!-- Tabs -->
     <div class="tab" id="theTab">
-        <button class="t5 tablinks" onclick="openCity(event,'1')" id="t1">Projet 1
+        <button class="t5 tablinks" onclick="openTab(event,'1')" id="t1">Projet 1
             <close id="c1" onClick="reply_click(this.id)">&times;</close>
         </button>
     </div>
@@ -93,6 +84,15 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="form-popup" id="myForm">
+        <form class="form-container">
+            <label for="psw"><a class="t9">Voulez-vous vous déconnecter ?</a></label>
+        
+            <button type="button" class="btn" onclick="validate()">Oui</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Non</button>
+        </form>
     </div>
 
     <!-- Footer -->

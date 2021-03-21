@@ -1,4 +1,4 @@
-function openCity(evt,project) {
+function openTab(evt,project) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -41,7 +41,7 @@ function New(map = { nodes: [], links: [] }) {
         nb_fen = i+1;
         list[i] = nb_fen;
 
-        var tab = '<button class="t5 tablinks" onclick="openCity(event,'+ nb_fen + ')" id="t'+ nb_fen +'">Projet ' + nb_fen + '<close id="c'+ nb_fen +'" onClick="reply_click(this.id)">&times;</close></button>';
+        var tab = '<button class="t5 tablinks" onclick="openTab(event,'+ nb_fen + ')" id="t'+ nb_fen +'">Projet ' + nb_fen + '<close id="c'+ nb_fen +'" onClick="reply_click(this.id)">&times;</close></button>';
 
         $(".tab").append(
             tab
@@ -97,7 +97,7 @@ function reply_click(clicked_id){
     num--;
     var newid = 't'.concat(num.toString());
 
-    //openCity(eventt,'2');
+    //openTab(eventt,'2');
     //document.getElementById(newid).click();
     
     //alert(newid);

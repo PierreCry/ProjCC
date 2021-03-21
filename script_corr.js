@@ -1,4 +1,4 @@
-function openCity(evt,project) {
+function openTab(evt,project) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -12,7 +12,7 @@ function openCity(evt,project) {
     evt.currentTarget.className += " active";
 }
 
-function openCity2(evt, name) {
+function openTab2(evt, name) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent2");
     for (i = 0; i < tabcontent.length; i++) {
@@ -26,7 +26,7 @@ function openCity2(evt, name) {
     evt.currentTarget.className += " active";
 }
 
-function openCity3(evt, name) {
+function openTab3(evt, name) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent3");
     for (i = 0; i < tabcontent.length; i++) {
@@ -40,7 +40,7 @@ function openCity3(evt, name) {
     evt.currentTarget.className += " active";
 }
 
-function openCity4(evt, name) {
+function openTab4(evt, name) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent4");
     for (i = 0; i < tabcontent.length; i++) {
