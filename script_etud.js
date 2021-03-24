@@ -51,17 +51,14 @@ function New(map = { nodes: [], links: [] }) {
             '<div id="P' + nb_fen + '" class="tabcontent">' +
                 '<div class="row">' +
                     '<!-- Canvas menu -->' +
-                    '<div class="column3">' +
+                    '<div class="column1">' +
+                        '<div id="canvas-container'+nb_fen+'" class="canvas-container"></div>' +
                         '<div class="icon-bar">' +
                             '<a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a>' +
                             '<a href="#"><i class="far fa-square"><span>Créer un concept</span></i></a>' +
                             '<a href="#"><i class="fas fa-external-link-alt"><span>Créer un lien</span></i></a>' +
                             '<a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>' +
                         '</div>' +
-                    '</div>' +
-                    '<!-- Canvas -->' +
-                    '<div class="column1">' +
-                        '<div id="canvas-container'+nb_fen+'" class="canvas-container"></div>' +
                     '</div>' +
                 '</div>' +
             '</div>'
@@ -96,12 +93,9 @@ function reply_click(clicked_id){
     list[num-1] = 0;
     num--;
     var newid = 't'.concat(num.toString());
-
-    //openTab(eventt,'2');
-    //document.getElementById(newid).click();
-    
-    //alert(newid);
 }
+
+//Form-popup 1 **************************
 
 var test = 0;
 
@@ -124,6 +118,28 @@ function closeForm() {
 function validate() {
     document.location.href="index.html";
 }
+
+//Form-popup 2 **************************
+
+var test2 = 0;
+
+function openForm2() {
+    if(test2 == 0) {
+        document.getElementById("myForm2").style.display = "block";
+        test2 = 1;
+    }
+    else {
+        document.getElementById("myForm2").style.display = "none";
+        test2 = 0;
+    }
+}
+
+function closeForm2() {
+    document.getElementById("myForm2").style.display = "none";
+    test2 = 0;
+}
+
+//***************************************
 
 function importEtud(input) {
     let files = input.files;
@@ -197,18 +213,3 @@ function exportEtud() {
     var json = canvas_to_json();
     download(json, "json-file-name.json", "text/plain");
 }
-
-$(document).ready(function() {
-    $("#mdp").keydown(function(e) {
-        if(e.which==13){
-            var str = document.getElementById("mdp").value;
-            if (str == "123") {
-                e.preventDefault();
-                document.location.href="Interface_correcteur.html";
-            }
-            else {
-                alert("Mot de passe incorrect");
-            }
-        }
-    });
-});

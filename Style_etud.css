@@ -3,29 +3,6 @@
     padding: 0;
 }
 
-@media (min-width:1500px) {
-}
-
-@media (min-width:1200px) and (max-width:1500px) {
-    .t1{font-size: 12pt !important; padding: 7px 15px 7px 15px!important;}
-    .t2{font-size: 13pt !important; padding-top: 10px !important}
-    .t4{font-size: 13pt !important; padding-top: 10px !important}
-    .t4bis{font-size: 13pt !important; padding-top: 9px !important; padding-bottom: 9px !important;}
-    .button{margin: 2px !important;}
-}
-
-@media (min-width:900px) and (max-width:1200px) {
-    .t1{font-size: 10pt !important; padding: 11px !important;}
-    .t2{font-size: 12pt !important; padding-top: 10px !important}
-    .t4{font-size: 12pt !important;}
-}
-
-@media (max-width:900px) {
-    .t1{font-size: 10pt !important; padding: 11px !important;}
-    .t2{font-size: 12pt !important; padding-top: 6px !important}
-    .t4{font-size: 12pt !important;}
-}
-
 body {
     background-color: #c7c7c7;
 }
@@ -152,6 +129,19 @@ body {
     padding-top: 7px
 }
 
+.t10 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 11pt;
+    letter-spacing: 0px;
+    color: #000000;
+    text-decoration: none;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-bottom: 0px;
+    padding-top: 0px
+}
+
 /***************************************************/
 
 ul {
@@ -159,7 +149,7 @@ ul {
     margin-left: 0px;
     margin-top: 0px;
     margin-right: 0px;
-    margin-bottom: 1%;
+    margin-bottom: 0px;
     padding: 0px;
     overflow: hidden;
     border: none;
@@ -236,14 +226,6 @@ li .active:active {
     transition: 0.1s;
 }
 
-#down {
-    display: none;
-}
-
-li:hover #down {
-    display: block;
-}
-
 /***************************************************/
 
 .button {
@@ -299,108 +281,20 @@ li:hover #down {
 
 /***************************************************/
 
-li .container {
-    height: 100%;
-    width: 100%;
-    background-color: #47565c;
-    border-radius: 15px;
-    padding: 10px 5px 10px 5px;
-    margin-left: 10px;
-}
-
-/***************************************************/
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 18px;
-    margin: 0px 0px 0px 2px;
-}
-  
-.switch input { 
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-  
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #c7c7c7;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-  
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 4px;
-    bottom: 2px;
-    background-color: #000000;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-  
-input:checked + .slider {
-    background-color: #47565c;
-}
-  
-input:focus + .slider {
-    box-shadow: 0 0 1px #47565c;
-}
-  
-input:checked + .slider:before {
-    -webkit-transform: translateX(18px);
-    -ms-transform: translateX(18px);
-    transform: translateX(18px);
-}
-  
-/* Rounded sliders */
-.slider.round {
-    border-radius: 20px;
-}
-  
-.slider.round:before {
-    border-radius: 50%;
-}
 
 /***************************************************/
 
 .row{
     width: 100%;
-    height: 100%;
+    height: 84vh;
+    padding: 20px;
 }
 
 .column1 {
     float: left;
     height: 100%;
-    width: 94.5%;
+    width: 98%;
     margin: 0 auto;
-    padding-left: 0%;
-    padding-top: 20px;
-    padding-right: 2%;
-    padding-bottom: 20px;
-    border: none;
-    background-color:#192c33;
-    /* Should be removed. Only for demonstration */
-}
-
-.column3 {
-    float: left;
-    height: 100%;
-    width: 3.5%;
-    margin: 0 auto;
-    padding-left: none;
-    padding-top: 20px;
-    padding-right: 0%;
-    padding-bottom: 20px;
     border: none;
     background-color:#192c33;
     /* Should be removed. Only for demonstration */
@@ -412,7 +306,6 @@ input:checked + .slider:before {
     display: table;
     clear: both;
 }
-
 /***************************************************/
 
 /* Style the tab */
@@ -420,6 +313,7 @@ input:checked + .slider:before {
     overflow: hidden;
     border: none;
     background: none;
+    margin-top: 1%;
 }
 
 /* Style the buttons inside the tab */
@@ -453,7 +347,7 @@ input:checked + .slider:before {
 /* Style the tab content */
 .tabcontent {
     width: 100%;
-    height: 83vh;
+    height: 100%;
     display: none;
     padding: none;
     border: none;
@@ -514,8 +408,10 @@ input:checked + .slider:before {
 /***************************************************/
 
 .icon-bar {
-    float: right;
-    width: 70%;
+    position: absolute;
+    top: 150px;
+    float: left;
+    width: 40px;
     padding-right: 0%;
     background-color: #c7c7c7;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -625,29 +521,25 @@ input:checked + .slider:before {
     }
 }
 
-/***************************************************/
-  
-/* The popup form - hidden by default */
+/**************************************************
+        Form1
+***************************************************/
+
 .form-popup {
     display: none;
-    position: relative;
     margin-bottom: 20px;
-    top: 2px;
-    left: 76vw;
     border: 2px;
     border-color: #000000;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     max-width: 320px;
 }
   
-/* Add styles to the form container */
 .form-container {
     width: 310px;
     padding: 10px;
     background-color: #47565C;
 }
   
-/* Set a style for the submit/login button */
 .form-container .btn {
     background-color: #148B00;
     color: white;
@@ -663,15 +555,64 @@ input:checked + .slider:before {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
   
-/* Add a red background color to the cancel button */
 .form-container .cancel {
     background-color: #FF0000;
     margin-right: 0%;
 }
   
-/* Add some hover effects to buttons */
 .form-container .btn:hover, .open-button:hover {
     opacity: 1;
+}
+
+/**************************************************
+        Form2
+***************************************************/
+  
+.form-popup2 {
+    display: none;
+    position: absolute;
+    top: 40px;
+    border: 2px;
+    border-color: #000000;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    max-width: 400px;
+}
+  
+.form-container2 {
+    width: 400px;
+    background-color: #f4f7f8;
+}
+  
+.form-container2 .btn {
+    background-color: #148B00;
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 40%;
+    margin-top: 15px;
+    margin-bottom:10px;
+    margin-right: 12%;
+    margin-left: 2%; 
+    opacity: 0.8;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+  
+.form-container2 .cancel {
+    background-color: #FF0000;
+    margin-right: 0%;
+}
+  
+.form-container2 .btn:hover, .open-button:hover {
+    opacity: 1;
+}
+
+/***************************************************/
+
+.centrer {
+    position: absolute;
+    top: 40%; left: 50%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
 }
 
 /***************************************************/
@@ -696,4 +637,57 @@ input:checked + .slider:before {
 
 .floating-toolbar .floating-toolbar__button--delete:hover {
     color: rgb(223, 70, 70);
+}
+
+/***************************************************/
+
+.button {
+    display: inline-block;
+    background-color: #f4f7f8;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 20px;
+    width: 120px;
+    height: 30px;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin: 5px;
+    margin-top: 3px;
+}
+
+.button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+.button span:after {
+    content: "\f093";
+    font-family: FontAwesome;
+    padding-left: 10px;
+    padding-right: 0px;
+    margin: 0px;
+    opacity: 0;
+    top: 0;
+    right: -30px;
+    transition: 0.5s;
+}
+
+.button:hover span {
+    padding-right: 10px;
+}
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.button:active {
+    transform: translateY(3px);
+}
+
+.button1 {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

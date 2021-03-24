@@ -1,97 +1,90 @@
 <html>
+    <head>
+        <title>ConceptMappingToul</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<head>
-    <title>ConceptMappingToul</title>
+        <link rel="stylesheet" href="Style_login.css">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,        800&display=swap" rel="stylesheet">
 
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://kit.fontawesome.com/5cfb8f8806.js" crossorigin="anonymous"></script>
+    </head>
 
-    <link rel="stylesheet" href="Style_login.css">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,        800&display=swap" rel="stylesheet">
+    <body>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://kit.fontawesome.com/5cfb8f8806.js" crossorigin="anonymous"></script>
+        <d class="ttempo">Login : prof - 123 / etudiant - 123</d>
 
-</head>
+        <c class="centrer t2 fas fa-door-open" onclick="openForm()">
+            <div class="t4" id="titre">ConceptMappingToul</div>
+        </c>
 
-<body>
+        <script>
+            function openForm() {
+            document.getElementById("myForm").style.display = "block";
+            document.getElementById("titre").style.display = "none";
+        }
 
-    <d class="ttempo">Login : prof - 123 / etudiant - 123</d>
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none";
+            document.getElementById("titre").style.display = "block"
+        }
+        </script>
+        <div class="centrer form-popup" id="myForm">
+            <form onsubmit="return check()" class="form-container" name = "frm" id = "frm" method = "POST">
+                <h1 class="t3">Identification</h1>
+                <br>
 
-    <c class="centrer t2 fas fa-door-open" onclick="openForm()">
-        <div class="t4" id="titre">ConceptMappingToul</div>
-    </c>
+                <label><b class="t1">Identifiant</b></label>
+                <input type="text" placeholder="Entrer l'identifiant" id="iOle5" name = "data">
 
-<script>
-    function openForm() {
-    document.getElementById("myForm").style.display = "block";
-    document.getElementById("titre").style.display = "none";
-}
+                <label><b class="t1">Mot de passe</b></label>
+                <input type="password" placeholder="Entrer mot de passe" id="KlOt1">
 
-function closeForm() {
-    document.getElementById("myForm").style.display = "none";
-    document.getElementById("titre").style.display = "block"
-}
-</script>
-<div class="centrer form-popup" id="myForm">
-    <form onsubmit="return check()" class="form-container" name = "frm" id = "frm" method = "POST">
-        <h1 class="t3">Identification</h1>
-        <br>
+                <button type="submit" class="btn">Entrer</button>
+                <button type="button" class="btn cancel" onclick="closeForm()">Fermer</button>
+            </form>
+        </div>
 
-        <label><b class="t1">Identifiant</b></label>
-        <input type="text" placeholder="Entrer l'identifiant" id="iOle5" name = "data">
+        <script>
+            function check(){
 
-        <label><b class="t1">Mot de passe</b></label>
-        <input type="password" placeholder="Entrer mot de passe" id="KlOt1">
+                identifiant = new Array();
+                hJyR6 = new Array();
+                identifiant = ["etudiant","prof"];
+                hJyR6 = ["123","123"];
 
-        <button type="submit" class="btn">Entrer</button>
-        <button type="button" class="btn cancel" onclick="closeForm()">Fermer</button>
-
-    </form>
-</div>
-
-<script>
-    function check(){
-
-        identifiant = new Array();
-        hJyR6 = new Array();
-        identifiant = ["etudiant","prof"];
-        hJyR6 = ["123","123"];
-
-        var f = document.getElementById("frm");
-        f.setAttribute('method',"post");
+                var f = document.getElementById("frm");
+                f.setAttribute('method',"post");
 
 
-        var test1 = 1;
-     var iOle5 = document.getElementById("iOle5").value;
-     var KlOt1 = document.getElementById("KlOt1").value;
-     for(i=0; i<identifiant.length; i++) {
-         if(iOle5 == identifiant[i]) {
-             test1 = 0;
-             if (KlOt1 == hJyR6[i]) {
-                 if(iOle5 == "prof") {
-                     f.setAttribute('action', 'Interface_correcteur.html')
-                     document.location.href="Interface_correcteur.html";
-                 }
-                 else {
-                     f.setAttribute('action', 'Interface_etudiant.php')
-                     document.location.href="Interface_etudiant.php";
-                 }
-             }
-             else {
-                 alert("Mot de passe incorrect");
-                 break;
-             }
-         }
-     }
-     if(test1 == 1) {
-         alert("Identifiant incorrect");
-     }
-     return true;
- }
-     </script>
-
-</body>
-
+                var test1 = 1;
+                var iOle5 = document.getElementById("iOle5").value;
+                var KlOt1 = document.getElementById("KlOt1").value;
+                for(i=0; i<identifiant.length; i++) {
+                    if(iOle5 == identifiant[i]) {
+                        test1 = 0;
+                        if (KlOt1 == hJyR6[i]) {
+                            if(iOle5 == "prof") {
+                                f.setAttribute('action', 'Interface_correcteur.html')
+                                document.location.href="Interface_correcteur.html";
+                            }
+                            else {
+                                f.setAttribute('action', 'Interface_etudiant.php')
+                                document.location.href="Interface_etudiant.php";
+                            }
+                        }
+                        else {
+                            alert("Mot de passe incorrect");
+                            break;
+                        }
+                    }
+                }
+                if(test1 == 1) {
+                    alert("Identifiant incorrect");
+                }
+                return true;
+            }
+        </script>
+    </body>
 </html>

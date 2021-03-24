@@ -27,30 +27,11 @@
         <li><a class="t1" href="#Enregistrer">Exporter</a></li>
         <li><a class="t1" href="#Importer">Importer</a></li>
         <li><a class="t1" href="#Télécharger" onclick="exportEtud()">Télécharger</a></li>
+        
         <li style="float:right"><b class="t4 fas fa-sign-out-alt" onclick="openForm()"></b></li>
-
-        <li style="float:right">
-            <c class="container t4bis fas fa-moon">
-                <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-            </c>
-        </li>
         <li style="float:right"><b class="t2 fas fa-redo" href="#redo_black"></b></li>
         <li style="float:right"><b class="t2 fas fa-undo" href="#undo_black"></b></li>
-        <li style="float:right"><button class="button button1" href="#run"> <span class="t8">Compiler</span></button></li>
-        <li style="float:right"><button class="button2 button3" href="#algo"> <span class="t8">test</span></button></li>
     </ul>
-
-    <div class="form-popup" id="myForm">
-        <form class="form-container">
-            <label for="psw"><a class="t9">Voulez-vous vous déconnecter ?</a></label>
-        
-            <button type="button" class="btn" onclick="validate()">Oui</button>
-            <button type="button" class="btn cancel" onclick="closeForm()">Non</button>
-        </form>
-    </div>
 
     <div id="myNav" class="overlay">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -63,7 +44,7 @@
     <div class="tab" id="theTab">
         <button class="t5 tablinks" onclick="openTab(event, '1')" id="t1">
             <left id="r1" class="t10 fas fa-arrow-left"></left>
-            <input class="text" type="text" id="doc" name="doc" value="document.nom" readonly>
+            <input class="text" type="text" id="doc" name="doc" value="Nom_Carte.Json" readonly>
             <right id="r1" class="t10 fas fa-arrow-right"></right>
         </button>
     </div>
@@ -72,6 +53,7 @@
         <div id="P1" class="tabcontent">
             <div class="row">
                 <!-- Canvas menu -->
+                <!--
                 <div class="column3">
                     <div class="icon-bar">
                         <a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a> 
@@ -81,14 +63,23 @@
                         <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
                     </div>
                 </div>
+                -->
                 <!-- Canvas -->
                 <div class="column1">
                     <div id="canvas-container">
                         <canvas id="canvas"></canvas>
                     </div>
+                    <div class="icon-bar2">
+                        <a href="#"><i class="fas fa-mouse-pointer"><span>Manipuler le graphe</span></i></a> 
+                        <a href="#"><k class="far fa-check-circle"><span>Rendre un objet valide</span></k></a>
+                        <a href="#"><l class="far fa-circle"><span>Rendre un objet neutre</span></l></a>
+                        <a href="#"><j class="far fa-times-circle"><span>Rendre un objet invalide</span></j></a>
+                        <a href="#"><i class="fas fa-compress-arrows-alt"><span>Recentre la carte</span></i></a>
+                    </div>
                 </div>
+
                 <!-- Marked for tags -->
-                <div class="column2">
+                <div class="column3">
                     <div id="option-container">
                         <input class="t7 form-control" type="text" placeholder="Rechercher" aria-label="Rechercher" style="margin: 0px 0px 2% 0px; width: 99%;">
                     </div>
@@ -179,9 +170,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="icon-bar3">
+                        <a href="#"><i class="fas fa-arrow-left"><span>Corriger carte</span></i></a> 
+                    </div>
+                    <div class="icon-bar4">
+                        <a href="#"><i class="fas fa-arrow-right"><span>Sauvegarder correction</span></i></a>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="form-popup centrer" id="myForm">
+        <form class="form-container">
+            <label for="psw"><a class="t9">Voulez-vous vous déconnecter ?</a></label>
+        
+            <button type="button" class="btn" onclick="validate()">Oui</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Non</button>
+        </form>
     </div>
 
     <!-- Footer -->
