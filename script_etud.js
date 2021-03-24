@@ -1,4 +1,22 @@
+
+var currentWindow = "t1";
+var nb_fen;
+var i;
+list = new Array();
+const canvasMapList = new Array();
+
+for (i=0;i<15;i++) { list[i] = 0; }
+list[0] = 1;
+
+window.addEventListener('DOMContentLoaded', () => {
+    const mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,"to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d'eau","x":138.22998992919986,"y":26.46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,"y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}`
+    const map = JSON.parse(mapJSON)
+    const container = document.getElementById('canvas-container1')
+    canvasMapList.push(createCanvasMap(container,map))
+})
+
 function openTab(evt,project) {
+    console.log(canvasMapList)
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -10,22 +28,8 @@ function openTab(evt,project) {
     }
     document.getElementById("P"+project.toString()).style.display = "block";
     evt.currentTarget.className += " active";
+    currentWindow = project;
 }
-
-var nb_fen;
-var i;
-list = new Array();
-canvasMapList = new Array();
-
-for (i=0;i<15;i++) { list[i] = 0; }
-list[0] = 1;
-
-window.addEventListener('DOMContentLoaded', () => {
-    const mapJSON = `{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,"to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d'eau","x":138.22998992919986,"y":26.46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,"y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}`
-    const map = JSON.parse(mapJSON)
-    const container = document.getElementById('canvas-container1')
-    canvasMapList.push(createCanvasMap(container, map))
-})
 
 function New(map = { nodes: [], links: [] }) {
 
@@ -71,7 +75,7 @@ function New(map = { nodes: [], links: [] }) {
         document.getElementById(tabid).click();
 
         // Création d'une carte vierge dans le nouvel onglet
-        const container = document.getElementById(`canvas-container${nb_fen}`);
+        var container = document.getElementById(`canvas-container${nb_fen}`);
         canvasMapList.push(createCanvasMap(container,map));
     }
 
@@ -96,11 +100,6 @@ function reply_click(clicked_id){
     list[num-1] = 0;
     num--;
     var newid = 't'.concat(num.toString());
-
-    //openTab(eventt,'2');
-    //document.getElementById(newid).click();
-    
-    //alert(newid);
 }
 
 var test = 0;
@@ -132,7 +131,6 @@ function importEtud(input) {
         reader.readAsText(files[i]);
         reader.onload = function() {
             let map = JSON.parse(reader.result);
-            console.log(map);
             New(map);
         };
         reader.onerror = function() {
@@ -143,12 +141,12 @@ function importEtud(input) {
 
 function findStage(container) {
     let gLinks = []; let gNodes = [];
-    canvasMapList.forEach(element => {
-        if (element.container = container) {
-            gLinks = element.gLinks
-            gNodes = element.gNodes
+    for (var i=0; i<canvasMapList.length; i++) {
+        if (canvasMapList[i].container == container) {
+            gLinks = canvasMapList[i].gLinks
+            gNodes = canvasMapList[i].gNodes
         }
-    });
+    }
     return [gLinks,gNodes];
 }
 
@@ -176,7 +174,7 @@ function writeJSON(gAll) {
 }
 
 function canvas_to_json() {
-    const container = document.getElementById(`canvas-container1`);
+    var container = document.getElementById('canvas-container'+currentWindow);
     let gAll = findStage(container);
     if (gAll[0].length == 0 && gAll[1].length == 0) {
         window.alert("Rien à exporter")
@@ -195,7 +193,8 @@ function download(content, fileName, contentType) {
 
 function exportEtud() {
     var json = canvas_to_json();
-    download(json, "json-file-name.json", "text/plain");
+    var filename = prompt("Entrez le nom de votre fichier !", "Projet "+currentWindow);
+    download(json, filename+".json", "text/plain");
 }
 
 $(document).ready(function() {

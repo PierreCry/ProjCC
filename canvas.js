@@ -301,7 +301,7 @@ function computeArrowIntersection(gNodeStart, gNodeEnd) {
 }
 
 class CanvasMap {
-    constructor(container, map) {
+    constructor(container,map) {
         this.container = container
         this.map = map
         this.state = STATE_DEFAULT
@@ -791,7 +791,7 @@ class CanvasMap {
 }
 
 function createCanvasMap(container, map = { nodes: [], links: [] }) {
-    let canvasMap = new CanvasMap(container, map)
+    let canvasMap = new CanvasMap(container,map)
 
     // TODO: Peut-être qu'on pourrait faire tout ça dans le constructeur de
     // `CanvasMap`.
