@@ -7,29 +7,6 @@
     --fond: #000000;
 }
 
-@media (min-width:1500px) {
-}
-
-@media (min-width:1200px) and (max-width:1500px) {
-    .t1{font-size: 12pt !important; padding: 7px 15px 7px 15px!important;}
-    .t2{font-size: 13pt !important; padding-top: 10px !important}
-    .t4{font-size: 13pt !important; padding-top: 10px !important}
-    .t4bis{font-size: 13pt !important; padding-top: 9px !important; padding-bottom: 9px !important;}
-    .button{margin: 2px !important;}
-}
-
-@media (min-width:900px) and (max-width:1200px) {
-    .t1{font-size: 10pt !important; padding: 11px !important;}
-    .t2{font-size: 12pt !important; padding-top: 10px !important}
-    .t4{font-size: 12pt !important;}
-}
-
-@media (max-width:900px) {
-    .t1{font-size: 10pt !important; padding: 11px !important;}
-    .t2{font-size: 12pt !important; padding-top: 6px !important}
-    .t4{font-size: 12pt !important;}
-}
-
 body {
     background-color: #c7c7c7;
 }
@@ -284,193 +261,13 @@ li .active:active {
 
 /***************************************************/
 
-.button {
-    display: inline-block;
-    background-color: #f4f7f8;
-    border: none;
-    color: #FFFFFF;
-    text-align: center;
-    font-size: 20px;
-    width: 120px;
-    height: 30px;
-    transition: all 0.2s;
-    cursor: pointer;
-    margin: 5px;
-    margin-top: 3px;
-}
-
-.button span {
-    cursor: pointer;
-    display: inline-block;
-    position: relative;
-    transition: 0.5s;
-}
-
-.button span:after {
-    content: "\f04b";
-    font-family: FontAwesome;
-    padding-left: 10px;
-    padding-right: 0px;
-    margin: 0px;
-    opacity: 0;
-    top: 0;
-    right: -30px;
-    transition: 0.5s;
-}
-
-.button:hover span {
-    padding-right: 10px;
-}
-
-.button:hover span:after {
-    opacity: 1;
-    right: 0;
-}
-
-.button:active {
-    transform: translateY(3px);
-}
-
-.button1 {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-/***************************************************/
-/*Button 2*/
-/***************************************************/
-
-.button2 {
-    display: inline-block;
-    background-color: #f4f7f8;
-    border: none;
-    color: #FFFFFF;
-    text-align: center;
-    font-size: 20px;
-    width: 120px;
-    height: 30px;
-    transition: all 0.2s;
-    cursor: pointer;
-    margin: 5px;
-    margin-top: 3px;
-}
-
-.button2 span {
-    cursor: pointer;
-    display: inline-block;
-    position: relative;
-    transition: 0.5s;
-}
-
-.button2 span:after {
-    content: "\f14a";
-    font-family: FontAwesome;
-    padding-left: 10px;
-    padding-right: 0px;
-    margin: 0px;
-    opacity: 0;
-    top: 0;
-    right: -30px;
-    transition: 0.5s;
-}
-
-.button2:hover span {
-    padding-right: 10px;
-}
-
-.button2:hover span:after {
-    opacity: 1;
-    right: 0;
-}
-
-.button2:active {
-    transform: translateY(3px);
-}
-
-.button3 {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-/***************************************************/
-
-li .container {
-    height: 100%;
-    width: 100%;
-    background-color: #47565c;
-    border-radius: 15px;
-    padding: 10px 5px 10px 5px;
-    margin-left: 10px;
-}
-
-/***************************************************/
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 18px;
-    margin: none;
-}
-  
-.switch input { 
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-  
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #c7c7c7;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-  
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 4px;
-    bottom: 2px;
-    background-color: #000000;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-  
-input:checked + .slider {
-    background-color: #47565c;
-}
-  
-input:focus + .slider {
-    box-shadow: 0 0 1px #47565c;
-}
-  
-input:checked + .slider:before {
-    -webkit-transform: translateX(18px);
-    -ms-transform: translateX(18px);
-    transform: translateX(18px);
-}
-  
-/* Rounded sliders */
-.slider.round {
-    border-radius: 20px;
-}
-  
-.slider.round:before {
-    border-radius: 50%;
-}
-
-/***************************************************/
-
 .row{
     width: 100%;
     height: 100%;
 }
 
+/* hold column1 */
+/*
 .column1 {
     float: left;
     height: 100%;
@@ -482,23 +279,33 @@ input:checked + .slider:before {
     padding-bottom: 20px;
     border: none;
     background-color:#192c33;
-    /* Should be removed. Only for demonstration */
+}
+*/
+
+.column1 {
+    float: left;
+    height: 100%;
+    width: 71.5%;
+    margin: 0 auto;
+    margin-left: 0.6%;
+    padding-left: 0%;
+    padding-right: 1%;
+    border: none;
+    background-color:#192c33;
 }
 
-.column2 {
-    float: left;
+.column3 {
+    float: right;
     height: 100%;
     width: 26%;
     margin: 0 auto;
     padding-left: 0%;
-    padding-top: 20px;
-    padding-right: 1%;
-    padding-bottom: 20px;
+    padding-right: 0.6%;
     border: none;
     background-color:#192c33;
-    /* Should be removed. Only for demonstration */
 }
 
+/*
 .column3 {
     float: left;
     height: 100%;
@@ -510,8 +317,8 @@ input:checked + .slider:before {
     padding-bottom: 20px;
     border: none;
     background-color:#192c33;
-    /* Should be removed. Only for demonstration */
 }
+*/
 
 /* Clear floats after the columns */
 .row:after {
@@ -563,6 +370,8 @@ input:checked + .slider:before {
 .tabcontent {
     width: 100%;
     height: 83vh;
+    padding-top: 20px;
+    padding-bottom: 20px;
     display: none;
     padding: none;
     border: none;
@@ -799,7 +608,9 @@ input:checked + .slider:before {
 }
 
 /***************************************************/
-
+    /*icon-bar1*/
+/***************************************************/
+/*
 .icon-bar {
     float: right;
     width: 70%;
@@ -863,6 +674,191 @@ input:checked + .slider:before {
 .icon-bar a l{
     color: #A48600;
 }
+*/
+/***************************************************/
+    /*icon-bar2*/
+/***************************************************/
+
+.icon-bar2 {
+    position: absolute;
+    top: 150px;
+    width: 40px;
+    padding-right: 0%;
+    background-color: #c7c7c7;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.icon-bar2 span {
+    opacity: 0;
+    font-size: 0pt;
+}
+
+.icon-bar2 a {
+    display: block;
+    text-align: center;
+    padding-left: 0px;
+    padding-top: 30%;
+    padding-right: 0px;
+    padding-bottom: 30%;
+    transition: all 0.2s ease;
+    color: #000000;
+    font-size: 90%;
+}
+
+.icon-bar2 a:hover {
+    color: #535353;
+    background-color: #f4f7f8;
+}
+
+.icon-bar2 a:hover span {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 10pt;
+    padding: 3px;
+    display: inline;
+    position: absolute;
+    margin-top:25px;
+    width: 130px;
+    border:1px solid #000000;
+    background:#ffffff;
+    text-align: center;
+    color: #000000;
+    opacity: 1;
+    transition-delay: 0.8s;
+    transition-duration: 0s;
+}
+
+.icon-bar2 a:active {
+    transform: translateY(3px);
+}
+
+.icon-bar2 a j{
+    color: red;
+}
+
+.icon-bar2 a k{
+    color: green;
+}
+
+.icon-bar2 a l{
+    color: #A48600;
+}
+
+/***************************************************/
+    /*icon-bar3*/
+/***************************************************/
+
+.icon-bar3 {
+    position: absolute;
+    top: 350px;
+    right: 26.3%;
+    width: 40px;
+    padding-right: 0%;
+    background-color: #c7c7c7;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.icon-bar3 span {
+    opacity: 0;
+    font-size: 0pt;
+}
+
+.icon-bar3 a {
+    display: block;
+    text-align: center;
+    padding-left: 0px;
+    padding-top: 30%;
+    padding-right: 0px;
+    padding-bottom: 30%;
+    transition: all 0.2s ease;
+    color: #000000;
+    font-size: 90%;
+}
+
+.icon-bar3 a:hover {
+    color: #535353;
+    background-color: #f4f7f8;
+}
+
+.icon-bar3 a:hover span {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 10pt;
+    padding: 3px;
+    display: inline;
+    position: absolute;
+    margin-top:25px;
+    width: 130px;
+    border:1px solid #000000;
+    background:#ffffff;
+    text-align: center;
+    color: #000000;
+    opacity: 1;
+    transition-delay: 0.8s;
+    transition-duration: 0s;
+}
+
+.icon-bar3 a:active {
+    transform: translateY(3px);
+}
+
+/***************************************************/
+    /*icon-bar4*/
+/***************************************************/
+
+.icon-bar4 {
+    position: absolute;
+    top: 420px;
+    right: 26.3%;
+    width: 40px;
+    padding-right: 0%;
+    background-color: #c7c7c7;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.icon-bar4 span {
+    opacity: 0;
+    font-size: 0pt;
+}
+
+.icon-bar4 a {
+    display: block;
+    text-align: center;
+    padding-left: 0px;
+    padding-top: 30%;
+    padding-right: 0px;
+    padding-bottom: 30%;
+    transition: all 0.2s ease;
+    color: #000000;
+    font-size: 90%;
+}
+
+.icon-bar4 a:hover {
+    color: #535353;
+    background-color: #f4f7f8;
+}
+
+.icon-bar4 a:hover span {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 10pt;
+    padding: 3px;
+    display: inline;
+    position: absolute;
+    margin-top:25px;
+    width: 130px;
+    border:1px solid #000000;
+    background:#ffffff;
+    text-align: center;
+    color: #000000;
+    opacity: 1;
+    transition-delay: 0.8s;
+    transition-duration: 0s;
+}
+
+.icon-bar4 a:active {
+    transform: translateY(3px);
+}
 
 /***************************************************/
 
@@ -921,10 +917,7 @@ input:checked + .slider:before {
 /* The popup form - hidden by default */
 .form-popup {
     display: none;
-    position: relative;
     margin-bottom: 20px;
-    top: 2px;
-    left: 76vw;
     border: 2px;
     border-color: #000000;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -988,6 +981,14 @@ input:checked + .slider:before {
 .form-container2 input[type=text]:focus, .form-container2 input[type=password]:focus {
     background-color: #ddd;
     outline: none;
+}
+
+/***************************************************/
+
+.centrer {
+    position: absolute;
+    top: 40%; left: 50%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%); /* décalage de 50% de sa propre taille */
 }
 
 /**************************************/
