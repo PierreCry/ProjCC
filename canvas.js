@@ -45,10 +45,10 @@ class GraphicalNode {
             name: 'graphicalNode',
         })
 
-        // On donne au groupe notre indice, pour pouvoir le récupérer lors du
+        // On stocke le nœud dans le groupe pour pouvoir le récupérer lors du
         // test d'intersection. Le nom de cet attribut doit être unique et ne
         // doit pas être utilisé en interne par Konva !
-        this.kGroup.setAttr('_gNodeIndex', index)
+        this.kGroup.setAttr('_gNode', this)
 
         let kNode = new Konva.Rect({
             fill: '#d9e1f3',
@@ -249,14 +249,14 @@ class GraphicalLink {
         })
     }
 
-    setFromNode(fromNodeIndex, gNodeFrom) {
-        this.link.from = fromNodeIndex
+    setFromNode(gNodeFrom) {
         this.gNodeFrom = gNodeFrom
+        this.link.from = gNodeFrom.index
     }
 
-    setToNode(toNodeIndex, gNodeTo) {
-        this.link.to = toNodeIndex
+    setToNode(gNodeTo) {
         this.gNodeTo = gNodeTo
+        this.link.to = gNodeTo.index
     }
 
     swapFromAndToNodes() {
@@ -307,6 +307,8 @@ class CanvasMap {
         this.state = STATE_DEFAULT
         this.selectedGObject = undefined
         this.kDraggingElement = undefined
+        // Stocke le prochain ID à attribuer à un nœud
+        this.nextNodeId = 0
 
         this.kStage = new Konva.Stage({
             container,
@@ -325,8 +327,7 @@ class CanvasMap {
         this.kStage.add(this.kMainLayer)
         this.kStage.add(this.kDragLayer)
 
-        this.gNodes = []
-        this.gLinks = []
+        this.gNodes = new Map()
 
         this.kStage.scale({ x: 1.5, y: 1.5 })
         this.kStage.draw()
@@ -395,14 +396,9 @@ class CanvasMap {
                 // listeners.
                 gObjectToDelete.kGroup.destroy()
 
-                // TODO: Il faut supprimer les nœuds dans les deux tableaux mais
-                // si on fait ça, il faut remettre à jour tous les indices pour
-                // tous les liens. Pour l'instant, on met juste les nœuds à
-                // `undefined` pour ne pas invalider les indices.
-                this.gNodes[gObjectToDelete.index] = undefined
-                this.map.nodes[gObjectToDelete.index] = undefined
-                // removeFromArray(this.gNodes, gObjectToDelete)
-                // removeFromArray(this.map.nodes, gObjectToDelete.node)
+                // On supprime le nœud de la map
+                this.gNodes.delete(gObjectToDelete.index)
+                removeFromArray(this.map.nodes, gObjectToDelete.node)
 
                 // On supprime tous les liens connectés à ce nœud
                 for (let gLinkIndex = gObjectToDelete.gLinks.length - 1;
@@ -436,15 +432,17 @@ class CanvasMap {
 
         nodeButtonElt.addEventListener('click', () => {
             const node = {
+                id: this.nextNodeId,
                 x: 0,
                 y: 0,
                 name: 'Concept'
             }
             this.addGraphicalNode(node)
+            this.map.nodes.push(node)
         })
 
         recenterButtonElt.addEventListener('click', () => {
-            this._recenterMap();
+            this.recenterMap();
         })
 
         window.addEventListener('resize', () => {
@@ -466,10 +464,14 @@ class CanvasMap {
         })
     }
 
+    getMapJSON() {
+        return JSON.stringify(this.map)
+    }
+
     addGraphicalNode(node, redrawLayer = true) {
         const gNode = this._createGraphicalNode(node)
 
-        this.gNodes.push(gNode)
+        this.gNodes.set(gNode.index, gNode)
         this.kMainLayer.add(gNode.kGroup)
         if (redrawLayer) this.kMainLayer.draw()
 
@@ -479,16 +481,42 @@ class CanvasMap {
     addGraphicalLink(link, redrawLayer = true) {
         const gLink = this._createGraphicalLink(link)
 
-        this.gLinks.push(gLink)
         this.kMainLayer.add(gLink.kGroup)
         if (redrawLayer) this.kMainLayer.draw()
 
         return gLink
     }
 
+    recenterMap() {
+        this._unselectObject()
+
+        let xMin = Number.MAX_VALUE
+        let yMin = Number.MAX_VALUE
+        let xMax = Number.MIN_VALUE
+        let yMax = Number.MIN_VALUE
+
+        for (const gNode of this.gNodes.values()) {
+            if (gNode) {
+                xMin = Math.min(xMin, gNode.x())
+                yMin = Math.min(yMin, gNode.y())
+                xMax = Math.max(xMax, gNode.x() + gNode.width())
+                yMax = Math.max(yMax, gNode.y() + gNode.height())
+            }
+        }
+
+        this.kStage.position({
+            x: -(xMin + xMax) * this.kStage.scale().x / 2 + this.kStage.width() / 2,
+            y: -(yMin + yMax) * this.kStage.scale().y / 2 + this.kStage.height() / 2,
+        })
+        this.kStage.draw()
+    }
+
     _createGraphicalNode(node) {
-        const nodeIndex = this.gNodes.length
-        let gNode = new GraphicalNode(node, nodeIndex)
+        if (node.id === undefined) {
+            node.id = this.nextNodeId
+        }
+        let gNode = new GraphicalNode(node, node.id)
+        this.nextNodeId++
 
         gNode.kGroup.on(EVENT_DOUBLE_CLICK, () => {
             konvaHandleTextInput(gNode.kText, newValue => {
@@ -498,19 +526,18 @@ class CanvasMap {
         })
 
         gNode.kGroup.on(EVENT_MOUSE_DOWN, e => {
-            const gNodeClicked = gNode
-
             // On désélectionne l'objet précédemment sélectionné
             this._unselectObject()
 
             if (this.state === STATE_CREATING_LINK) {
                 const link = {
-                    from: gNodeClicked.index,
+                    from: gNode.index,
                     to: -1,
                     verb: 'Lien',
                 }
                 const gLink = this.addGraphicalLink(link, false)
-                gNodeClicked.gLinks.push(gLink)
+                gNode.gLinks.push(gLink)
+                this.map.links.push(link)
 
                 const pointerPos = getAbsolutePointerPosition(this.kStage)
                 gLink.moveHandle(false, pointerPos.x, pointerPos.y)
@@ -518,14 +545,14 @@ class CanvasMap {
                 this.kDraggingElement = gLink.kEndHandle
             } else {
                 // On sélectionne le nouveau nœud
-                this._selectObject(gNodeClicked)
+                this._selectObject(gNode)
 
                 this.kMainLayer.draw()
 
                 // On met le nœud au premier plan et on active le drag.
-                gNodeClicked.kGroup.moveToTop()
-                gNodeClicked.kGroup.startDrag()
-                this.kDraggingElement = gNodeClicked.kGroup
+                gNode.kGroup.moveToTop()
+                gNode.kGroup.startDrag()
+                this.kDraggingElement = gNode.kGroup
 
                 // Il ne faut pas appeler `this.kMainLayer.draw` après ce point
                 // car sinon le drag-and-drop ne fonctionne pas correctement
@@ -548,8 +575,8 @@ class CanvasMap {
     }
 
     _createGraphicalLink(link) {
-        const gNodeFrom = link.from !== -1 ? this.gNodes[link.from] : undefined
-        const gNodeTo = link.to !== -1 ? this.gNodes[link.to] : undefined
+        const gNodeFrom = link.from !== -1 ? this.gNodes.get(link.from) : undefined
+        const gNodeTo = link.to !== -1 ? this.gNodes.get(link.to) : undefined
         let gLink = new GraphicalLink(link, gNodeFrom, gNodeTo)
 
         // On met les handles sur leur propre layer quand on les drag pour
@@ -629,35 +656,31 @@ class CanvasMap {
             intersectedKNode.findAncestor('.graphicalNode') :
             undefined
 
-        const intersectedNodeIndex = kGroup ? kGroup.getAttr('_gNodeIndex') : -1
+        const intersectedGNode = kGroup ? kGroup.getAttr('_gNode') : undefined
 
-        if (intersectedNodeIndex >= 0 &&
+        if (intersectedGNode &&
             (!this.state === STATE_CREATING_LINK ||
-             gLink.link.from !== intersectedNodeIndex)
+             gLink.link.from !== intersectedGNode)
         ) {
             // On a trouvé un nœud destination et dans le cas où on est en train
             // de créer un lien, ce nœud n'est pas le nœud de départ.
 
             // Si on a relié le début et la fin au même nœud, on inverse les
             // liens, sinon on se connecte au nouveau nœud
-            if (!isStartHandle && intersectedNodeIndex === gLink.link.from ||
-                isStartHandle && intersectedNodeIndex === gLink.link.to
+            if (!isStartHandle && intersectedGNode.index === gLink.link.from ||
+                isStartHandle && intersectedGNode.index === gLink.link.to
             ) {
                 gLink.swapFromAndToNodes()
             } else {
                 let oldNode
                 if (isStartHandle) {
-                    oldNode = this.gNodes[gLink.from]
-                    gLink.setFromNode(
-                        intersectedNodeIndex,
-                        this.gNodes[intersectedNodeIndex])
+                    oldNode = gLink.gNodeFrom
+                    gLink.setFromNode(intersectedGNode)
                 } else {
                     if (gLink.link.to !== -1) {
-                        oldNode = this.gNodes[gLink.link.to]
+                        oldNode = gLink.gNodeTo
                     }
-                    gLink.setToNode(
-                        intersectedNodeIndex,
-                        this.gNodes[intersectedNodeIndex])
+                    gLink.setToNode(intersectedGNode)
                 }
 
                 if (oldNode) {
@@ -665,7 +688,7 @@ class CanvasMap {
                     removeFromArray(oldNode.gLinks, gLink)
                 }
                 // ...et on l'ajoute au nœud intersecté
-                this.gNodes[intersectedNodeIndex].gLinks.push(gLink)
+                intersectedGNode.gLinks.push(gLink)
             }
         } else if (this.state === STATE_CREATING_LINK) {
             // On est en train de créer un lien mais on n'a pas trouvé de nœud
@@ -700,30 +723,6 @@ class CanvasMap {
         // On supprime le lien du nœud de départ et d'arrivée s'ils existent
         if (gLink.gNodeFrom) removeFromArray(gLink.gNodeFrom.gLinks, gLink)
         if (gLink.gNodeTo) removeFromArray(gLink.gNodeTo.gLinks, gLink)
-    }
-
-    _recenterMap() {
-        this._unselectObject()
-
-        let xMin = Number.MAX_VALUE
-        let yMin = Number.MAX_VALUE
-        let xMax = Number.MIN_VALUE
-        let yMax = Number.MIN_VALUE
-
-        for (const gNode of this.gNodes) {
-            if (gNode) {
-                xMin = Math.min(xMin, gNode.x())
-                yMin = Math.min(yMin, gNode.y())
-                xMax = Math.max(xMax, gNode.x() + gNode.width())
-                yMax = Math.max(yMax, gNode.y() + gNode.height())
-            }
-        }
-
-        this.kStage.position({
-            x: -(xMin + xMax) * this.kStage.scale().x / 2 + this.kStage.width() / 2,
-            y: -(yMin + yMax) * this.kStage.scale().y / 2 + this.kStage.height() / 2,
-        })
-        this.kStage.draw()
     }
 
     /**
@@ -804,6 +803,8 @@ function createCanvasMap(container, map = { nodes: [], links: [] }) {
     for (let link of map.links) {
         gLinks.push(canvasMap.addGraphicalLink(link, false))
     }
+
+    canvasMap.recenterMap()
 
     canvasMap.kMainLayer.draw()
 

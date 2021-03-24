@@ -161,47 +161,58 @@ function importEtud(input) {
 }
 
 function findStage(container) {
-    let gLinks = []; let gNodes = [];
-    for (var i=0; i<canvasMapList.length; i++) {
-        if (canvasMapList[i].container == container) {
-            gLinks = canvasMapList[i].gLinks
-            gNodes = canvasMapList[i].gNodes
-        }
-    }
-    return [gLinks,gNodes];
+    // let gLinks = []; let gNodes = [];
+    // for (var i=0; i<canvasMapList.length; i++) {
+    //     if (canvasMapList[i].container == container) {
+    //         gLinks = canvasMapList[i].gLinks
+    //         gNodes = canvasMapList[i].gNodes
+    //     }
+    // }
+    // return [gLinks,gNodes];
+
+    return canvasMapList.find(e => e.container === container);
 }
 
-function writeJSON(gAll) {
+// function writeJSON(gAll) {
 
-    // link
-    let JSON = `{"links":[`
-    gAll[0].forEach(element => {
-        link = element.link;
-        JSON = JSON + `{"from":` + link.from + `,"to":` + link.to + `,"verb":"` + link.verb + `"},`;
-    });
-    JSON = JSON.slice(0,-1);
+//     // link
+//     let JSON = `{"links":[`
+//     gAll[0].forEach(element => {
+//         link = element.link;
+//         JSON = JSON + `{"from":` + link.from + `,"to":` + link.to + `,"verb":"` + link.verb + `"},`;
+//     });
+//     JSON = JSON.slice(0,-1);
 
-    // node
-    JSON = JSON + `],"nodes":[`
-    gAll[1].forEach(element => {
-        node = element.node;
-        JSON = JSON + `{"name":"` + node.name + `","x":` + node.x + `,"y":` + node.y + `},`;
-    });
-    JSON = JSON.slice(0,-1);
-    JSON = JSON + `]}`
+//     // node
+//     JSON = JSON + `],"nodes":[`
+//     gAll[1].forEach(element => {
+//         node = element.node;
+//         JSON = JSON + `{"name":"` + node.name + `","x":` + node.x + `,"y":` + node.y + `},`;
+//     });
+//     JSON = JSON.slice(0,-1);
+//     JSON = JSON + `]}`
 
-    return JSON
+//     return JSON
 
-}
+// }
 
 function canvas_to_json() {
     var container = document.getElementById('canvas-container'+currentWindow);
-    let gAll = findStage(container);
-    if (gAll[0].length == 0 && gAll[1].length == 0) {
-        window.alert("Rien à exporter")
-    } else {
-        return writeJSON(gAll);
+    let canvasMap = findStage(container);
+
+    // let gAll = findStage(container);
+    // if (gAll[0].length == 0 && gAll[1].length == 0) {
+    //     window.alert("Rien à exporter")
+    // } else {
+    //     return writeJSON(gAll);
+    // }
+
+    if (!canvasMap) {
+        window.alert("Rien à exporter");
+        return '';
     }
+
+    return canvasMap.getMapJSON();
 }
 
 function download(content, fileName, contentType) {
