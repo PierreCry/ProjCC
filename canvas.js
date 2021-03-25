@@ -632,8 +632,10 @@ class CanvasMap {
 
         // Configuration des boutons de l'interface
         // TODO(#4): Il faudra passer les boutons de l'interface au constructeur
-        // au lieu de les récupérer d'ici.
-        let buttonsElt = document.querySelector('.icon-bar').children
+        // au lieu de les récupérer d'ici (ici on suppose que le parent du
+        // container possède la barre d'icône ce qui n'est pas forcément le cas
+        // si on change la structure de la page HTML).
+        let buttonsElt = container.parentElement.querySelector('.icon-bar').children
         let nodeButtonElt = buttonsElt[1]
         let linkButtonElt = buttonsElt[2]
         let recenterButtonElt = buttonsElt[3]
@@ -737,6 +739,8 @@ class CanvasMap {
      */
     recenterMap() {
         this._unselectObject()
+
+        if (this.gNodes.size === 0) return
 
         let xMin = Number.MAX_VALUE
         let yMin = Number.MAX_VALUE
