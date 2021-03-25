@@ -30,6 +30,11 @@ function openTab(evt,project) {
     currentWindow = project;
 }
 
+function importEtudDB(){
+    let map = '<?php echo json_encode($json); ?>';
+    New(map);
+}
+
 function New(map = { nodes: [], links: [] }) {
 
     i = -1;
@@ -159,7 +164,6 @@ function closeForm3() {
     document.getElementById("myForm3").style.display = "none";
     test3 = 0;
 }
-
 
 //***************************************
 

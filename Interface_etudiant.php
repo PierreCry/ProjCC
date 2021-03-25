@@ -22,9 +22,9 @@
         error_reporting(0);
 
         session_start();
-
-        // $conn = mysqli_connect('localhost:3306', 'pi', 'lmao', '');
-        $conn = mysqli_connect('localhost:3307', 'root', '', '');
+        
+        $conn = mysqli_connect('localhost:3306', 'pi', 'lmao', '');
+        //$conn = mysqli_connect('localhost:3307', 'root', '', '');
 
         if(!$conn){
             die("Connection failed: <br>". mysqli_connect_error());
@@ -85,12 +85,11 @@
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-        //    echo "Json: " . $row["JSON"]. "<br>";
+        //  echo "Json: " . $row["JSON"]. "<br>";
             }
         } else {
         //  echo "0 results <br>";
         }
-        
     ?>
     
     <!-- Menu flottant pour le canvas -->
@@ -161,18 +160,52 @@
         </form>
     </div>
 
-    <div class="form-popup2" id="myForm2">
-        <form class="form-container2">
+    <div class="form-popup2" id = "myForm2">
+        <form class="form-container2" onsubmit = "return getInfoImport()"  method = "post" name = "myForm2" id = "myForm2">
             <ul style="padding-top: 5px; padding-bottom: 5px;">
-                <li style="float:right" class="t10">Importer depuis la base de donnée<button class="button button1" href="#run"><span class="t8">BDD</span></button></li>
+                <li style="float:right" class="t10">Importer depuis la BDD
+
+                <select id = "classe2" name = "classe2">
+                    <option value = "">Class</option>
+                        <?php
+                            $resultSet = $conn -> query("SELECT DISTINCT classID FROM tableJointure WHERE studentID = '" . $StudentID . "'");
+                            $numResult = mysqli_num_rows($resultSet);
+                            
+                            for ($i = 0; $i < $numResult; $i++) {
+                                $row = mysqli_fetch_array($resultSet); 
+                        ?>
+                        <option value = "<?php echo $row["classID"] ?> "> <?php echo $row["classID"]?></option>
+                        <?php
+                            }
+                        ?>
+                </select>
+                <select id = "examen2" name = "examen2">
+                    <option value = "">Examen</option>
+                        <?php
+                            $resultSet = $conn -> query("SELECT DISTINCT examID FROM tableJointure WHERE studentID = '" . $StudentID . "'");
+                            $numResult = mysqli_num_rows($resultSet);
+                            
+                            for ($i = 0; $i < $numResult; $i++) {
+                                $row = mysqli_fetch_array($resultSet); 
+                        ?>
+
+                        <option value = "<?php echo $row["examID"] ?> "> <?php echo $row["examID"]?></option>
+                        <?php
+                            }
+                        ?>
+                </select>            
+                <input type="submit" id = "ExporterBDD" name="ExporterBDD" value="OK"/>
+                </li>
                 <li style="float:right" class="t10">Importer depuis l'ordinateur<input class="button button1" type="file" onchange="importEtud(this)" accept=".json" multiple></li>
             </ul>
         </form>
     </div>
 
-    <div class="form-popup2" id="myForm3">
-        <form onsubmit = "return exportBDD()" class="form-container2" method = "post" name = "myForm" id = "myForm"> 
-            Classe
+    <div class="form-popup2" id = "myForm3">
+        <form class="form-container2" onsubmit = "return exportBDD()"  method = "post" name = "myForm" id = "myForm">
+            <ul style="padding-top: 5px; padding-bottom: 5px;">
+                <li style="float:right" class="t10">Classe
+
                 <select id = "classe" name = "classe">
                     <option value = "">Choisir</option>
                         <?php
@@ -183,17 +216,13 @@
                                 $row = mysqli_fetch_array($resultSet); 
                         ?>
 
-
                         <option value = "<?php echo $row["classID"] ?> "> <?php echo $row["classID"]?></option>
                         <?php
                             }
                         ?>
                 </select>
-                <input placeholder = "Ajouter un nouveau" id = "newClass" type="text" name="newClass" id = "newClass"/><hr/>	   		   
-
-                <hr/>
-                Examen
-                <select id = "examen" name = "examen">
+                <input placeholder = "Ajouter un nouveau" id = "newClass" type="text" name="newClass" id = "newClass"/><hr/>               
+                Examen <select id = "examen" name = "examen">
                     <option value = "">Choisir</option>
                         <?php
                             $resultSet = $conn -> query("SELECT DISTINCT examID FROM tableJointure WHERE studentID = '" . $StudentID . "'");
@@ -207,14 +236,34 @@
                         <?php
                             }
                         ?>
-                <input placeholder = "Ajouter un nouveau" id = "newExam" type="text" name="newExam"/><hr/>	   		   
+                </select>
+                <input placeholder = "Ajouter un nouveau" id = "newExam" type="text" name="newExam"/><hr/>             
                 <input placeholder="" type = "hidden" id = "test1" name = "test1" value=""/>
-                <input type="submit" id = "ExporterBDD" name="ExporterBDD" value="Exporter vers la BDD"/>
-
+                <input type="submit" id = "ExporterBDD" name="ExporterBDD" value="OK"/>
+                </li>
+            </ul>
         </form>
     </div>
 
+
+
     <script>
+    function getInfoImport(){
+
+            var classeMenu = document.getElementById("classe");
+            var classeUser = classeMenu.options[classeMenu.selectedIndex].text;
+
+            var examenMenu = document.getElementById("examen");
+            var examenUser = examenMenu.options[examenMenu.selectedIndex].text;
+            
+            var f = document.getElementById("myForm2");
+            f.setAttribute('method',"post");
+            f.setAttribute('action', 'Interface_etudiant.php')
+
+            return true;
+
+    }
+
         function exportBDD(){
 
             $JSON = canvas_to_json();
@@ -239,16 +288,36 @@
                     var examenUser = examenMenu.value;
                 }
             }
-            return true;
+            var f = document.getElementById("myForm");
+            f.setAttribute('method', "post");
+            f.setAttribute('action', 'Interface_etudiant.php')
 
+        return true;
         }
-        var f = document.getElementById("myForm");
-        f.setAttribute('method',"post");
-        f.setAttribute('action', 'Interface_etudiant.php')
 
     </script>
 
     <?php            
+
+        // This returns JSON from database.
+        if(isset($_POST['classe2']) and isset($_POST['examen2'])){
+                $classeImport = $_POST['classe2'];
+                $examenImport = $_POST['examen2'];
+                $sql = "SELECT JSON FROM TableJointure WHERE StudentID = '$StudentID' AND 
+                                                             ClassID = '$classeImport' AND 
+                                                             ExamID = '$examenImport'";
+                $result = $conn->query($sql);
+                if ($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                    // echo "Json: " . $row["JSON"]. "<br>";
+                    $json = $row["JSON"];
+                    // echo $json; Database               
+                    }
+                } else {
+                    echo "0 results <br>";
+                }
+            }
+
         if($_POST['examen'] == "" and isset($_POST['newExam'])){
             $newExam = $_POST['newExam'];
         }
@@ -282,8 +351,8 @@
            $JSON = mysqli_real_escape_string($conn, $JSON);
 
             $sql = "IF NOT EXISTS (SELECT * FROM TableJointure WHERE StudentID = '$StudentID' AND 
-                                                                         ClassID = '$newClass' AND 
-                                                                         ExamID = '$newExam')
+                                                                     ClassID = '$newClass' AND 
+                                                                     ExamID = '$newExam')
                 
                     THEN
                         INSERT INTO TableJointure (StudentID, ClassID, ExamID, JSON, Note) 
@@ -303,7 +372,6 @@
                 echo "Error inserting informations: <br>" . $conn->error;
             }
         }
-
     ?>
 
     <!-- Footer -->
@@ -314,5 +382,4 @@
     </script>
 
 </body>
-
 </html>
