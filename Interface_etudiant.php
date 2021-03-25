@@ -314,7 +314,7 @@
                     // echo $json; Database               
                     }
                 } else {
-                    echo "0 results <br>";
+                    // echo "0 results <br>";
                 }
             }
 
@@ -369,7 +369,7 @@
             if ($conn->query($sql) === TRUE) {
             //  echo "Informations inserted successfully <br>";
             } else {
-                echo "Error inserting informations: <br>" . $conn->error;
+            //    echo "Error inserting informations: <br>" . $conn->error;
             }
         }
     ?>
