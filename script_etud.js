@@ -134,6 +134,7 @@ var test2 = 0;
 function openForm2() {
     if(test2 == 0) {
         document.getElementById("myForm2").style.display = "block";
+        document.getElementById("myForm3").style.display = "none";
         test2 = 1;
     }
     else {
@@ -152,6 +153,7 @@ var test3 = 0;
 function openForm3() {
     if(test3 == 0) {
         document.getElementById("myForm3").style.display = "block";
+        document.getElementById("myForm2").style.display = "none";
         test3 = 1;
     }
     else {
