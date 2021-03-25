@@ -375,7 +375,7 @@
     ?>
 
     <!-- Footer -->
-    <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 12</footer>
+    <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 13</footer>
 
     <script>
         document.getElementById("t1").click();
