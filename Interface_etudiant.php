@@ -19,31 +19,33 @@
 
 <body>
     <?php
-        $ClassID = "Estimation";
-        $ExamID = "SecondeSession";
-        $JSON = '{"links":[{"from":0,"to":2,"verb":"entraîne"},{"from":1,"to":2,"verb":"entraîne"},{"from":2,"to":3,"verb":"entraîne"},{"from":2,    "to":4,"verb":"entraîne"},{"from":4,"to":5,"verb":"entraîne"}],"nodes":[{"name":"Perte d\'eau","x":138.22998992919986,"y":26.                46000372314429},{"name":"Perte de Na","x":299.33999975585937,"y":26.42000000000001},{"name":"Baisse de la volémie","x":184.31998687744215,   "y":131.85999493408235},{"name":"Réponse rénale","x":303.1199960327151,"y":237.87998651123132},{"name":"Baisse de la PSA","x":134.           73000024414057,"y":239.1799876708992},{"name":"Tachycardie de compensation","x":95.55997955322391,"y":340.3799825439464}]}';
+        error_reporting(0);
 
-        $conn = mysqli_connect('localhost:3306', 'pi', 'lmao', '');
-        // $conn = mysqli_connect('localhost:3307', 'root', '', '');
+        session_start();
 
-        $JSON = mysqli_real_escape_string($conn, $JSON);
+        // $conn = mysqli_connect('localhost:3306', 'pi', 'lmao', '');
+        $conn = mysqli_connect('localhost:3307', 'root', '', '');
 
         if(!$conn){
             die("Connection failed: <br>". mysqli_connect_error());
         }
         
-        $sql = "CREATE DATABASE IF NOT EXISTS ConceptMaps1";
+        $sql = "CREATE DATABASE IF NOT EXISTS ConceptMaps";
         if ($conn->query($sql) === TRUE) {
         //  echo "Database created successfully <br>";
         } else {
         //  echo "Error creating database: <br>" . $conn->error;
         }
         
-        $conn -> select_db("ConceptMaps1");
+        $conn -> select_db("ConceptMaps");
         
         // Pass StudentID from script_login.js
-        $StudentID = $_POST['data'];
+        if(empty($_SESSION['loggedIn']) ) {
+            $_SESSION['loggedIn'] = $_POST['data'];
+       }
         
+        $StudentID = $_SESSION['loggedIn'];  
+
         $sql = "CREATE TABLE IF NOT EXISTS Student (StudentID VARCHAR(255) NOT NULL UNIQUE) CHARSET = utf8";
         if ($conn->query($sql) === TRUE) {
         //  echo "Table created successfully <br>";
@@ -65,7 +67,7 @@
         //  echo "Error creating table: <br>" . $conn->error;
         }
         
-        $sql = "CREATE TABLE IF NOT EXISTS TableJointure (`StudentID` VARCHAR(255) NOT NULL, `ClassID` VARCHAR(255) NOT NULL, `ExamID` VARCHAR(255) NOT NULL, `JSON` TEXT(4294967295), `Note` VARCHAR(255), CONSTRAINT `uniqueAttributes` UNIQUE (StudentID, `ClassID`, `ExamID`, JSON(255))) CHARSET =  utf8";
+        $sql = "CREATE TABLE IF NOT EXISTS TableJointure (`StudentID` VARCHAR(255) NOT NULL, `ClassID` VARCHAR(255) NOT NULL, `ExamID` VARCHAR(255) NOT NULL, `JSON` TEXT(4294967295), `Note` VARCHAR(255), CONSTRAINT `uniqueAttributes` UNIQUE (StudentID, `ClassID`, `ExamID`)) CHARSET =  utf8";
         if ($conn->query($sql) === TRUE) {
         //  echo "Table created successfully <br>";
         } else {
@@ -79,27 +81,6 @@
         //  echo "Error inserting informations: <br>" . $conn->error;
         }
         
-        $sql = "INSERT INTO Class (ClassID) VALUES ('$ClassID')";
-        if ($conn->query($sql) === TRUE) {
-        //  echo "Informations inserted successfully <br>";
-        } else {
-        //  echo "Error inserting informations: <br>" . $conn->error;
-        }
-        
-        $sql = "INSERT INTO Exam (ExamID) VALUES ('$ExamID')";
-        if ($conn->query($sql) === TRUE) {
-        //  echo "Informations inserted successfully <br>";
-        } else {
-        //  echo "Error inserting informations: <br>" . $conn->error;
-        }
-        
-        $sql = "INSERT INTO TableJointure (StudentID, ClassID, ExamID, JSON, Note) VALUES ('$StudentID', '$ClassID', '$ExamID', '$JSON', '')";
-        if ($conn->query($sql) === TRUE) {
-        //  echo "Informations inserted successfully <br>";
-        } else {
-        //  echo "Error inserting informations: <br>" . $conn->error;
-        }
-
         $sql = "SELECT * FROM TableJointure";
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
@@ -123,7 +104,7 @@
     <ul>
         <li><a class="t1 active" href="#Aide" onclick="openNav()">Aide</a></li>
         <li><a class="t1" href="#Nouveau" onclick="New()">Nouveau</a></li>
-        <li><a class="t1" href="#Exporter">Exporter</a></li>
+        <li><a class="t1" href="#Exporter" onclick = "openForm3()">Exporter</a></li>
         <li><a class="t1" href="#Importer" onclick="openForm2()">Importer</a>
             <!--
             <ul style="display: none;">
@@ -188,6 +169,142 @@
             </ul>
         </form>
     </div>
+
+    <div class="form-popup2" id="myForm3">
+        <form onsubmit = "return exportBDD()" class="form-container2" method = "post" name = "myForm" id = "myForm"> 
+            Classe
+                <select id = "classe" name = "classe">
+                    <option value = "">Choisir</option>
+                        <?php
+                            $resultSet = $conn -> query("SELECT DISTINCT classID FROM tableJointure WHERE studentID = '" . $StudentID . "'");
+                            $numResult = mysqli_num_rows($resultSet);
+                            
+                            for ($i = 0; $i < $numResult; $i++) {
+                                $row = mysqli_fetch_array($resultSet); 
+                        ?>
+
+
+                        <option value = "<?php echo $row["classID"] ?> "> <?php echo $row["classID"]?></option>
+                        <?php
+                            }
+                        ?>
+                </select>
+                <input placeholder = "Ajouter un nouveau" id = "newClass" type="text" name="newClass" id = "newClass"/><hr/>	   		   
+
+                <hr/>
+                Examen
+                <select id = "examen" name = "examen">
+                    <option value = "">Choisir</option>
+                        <?php
+                            $resultSet = $conn -> query("SELECT DISTINCT examID FROM tableJointure WHERE studentID = '" . $StudentID . "'");
+                            $numResult = mysqli_num_rows($resultSet);
+                            
+                            for ($i = 0; $i < $numResult; $i++) {
+                                $row = mysqli_fetch_array($resultSet); 
+                        ?>
+
+                        <option value = "<?php echo $row["examID"] ?> "> <?php echo $row["examID"]?></option>
+                        <?php
+                            }
+                        ?>
+                <input placeholder = "Ajouter un nouveau" id = "newExam" type="text" name="newExam"/><hr/>	   		   
+                <input placeholder="" type = "hidden" id = "test1" name = "test1" value=""/>
+                <input type="submit" id = "ExporterBDD" name="ExporterBDD" value="Exporter vers la BDD"/>
+
+        </form>
+    </div>
+
+    <script>
+        function exportBDD(){
+
+            $JSON = canvas_to_json();
+            document.getElementById("test1").value = canvas_to_json();
+
+            var classeMenu = document.getElementById("classe");
+            var classeUser = classeMenu.options[classeMenu.selectedIndex].text;
+
+            var examenMenu = document.getElementById("examen");
+            var examenUser = examenMenu.options[examenMenu.selectedIndex].text;
+
+            if(classeUser == "Choisir"){
+                var classeMenu = document.getElementById("newClass");
+                if(classeMenu.placeholder){
+                    var classeUser = classeMenu.value;
+                }
+            }
+
+            if(examenUser == "Choisir"){
+                var examenMenu = document.getElementById("newExam");
+                if(examenMenu.placeholder){
+                    var examenUser = examenMenu.value;
+                }
+            }
+            return true;
+
+        }
+        var f = document.getElementById("myForm");
+        f.setAttribute('method',"post");
+        f.setAttribute('action', 'Interface_etudiant.php')
+
+    </script>
+
+    <?php            
+        if($_POST['examen'] == "" and isset($_POST['newExam'])){
+            $newExam = $_POST['newExam'];
+        }
+        else{
+            $newExam = $_POST['examen'];
+        }
+
+        if($_POST['classe'] == "" and isset($_POST['newClass'])){
+            $newClass = $_POST['newClass'];
+        }
+        else{
+            $newClass = $_POST['classe'];
+        }
+
+        if($newExam && $newClass){
+            $sql = "INSERT INTO Class (ClassID) VALUES ('$newClass')";
+            if ($conn->query($sql) === TRUE) {
+            //  echo "Informations inserted successfully <br>";
+            } else {
+            //  echo "Error inserting informations: <br>" . $conn->error;
+            }
+            
+            $sql = "INSERT INTO Exam (ExamID) VALUES ('$newExam')";
+            if ($conn->query($sql) === TRUE) {
+            //  echo "Informations inserted successfully <br>";
+            } else {
+            //  echo "Error inserting informations: <br>" . $conn->error;
+            }
+
+           $JSON = $_POST['test1'];
+           $JSON = mysqli_real_escape_string($conn, $JSON);
+
+            $sql = "IF NOT EXISTS (SELECT * FROM TableJointure WHERE StudentID = '$StudentID' AND 
+                                                                         ClassID = '$newClass' AND 
+                                                                         ExamID = '$newExam')
+                
+                    THEN
+                        INSERT INTO TableJointure (StudentID, ClassID, ExamID, JSON, Note) 
+                        VALUES 
+                        ('$StudentID', '$newClass', '$newExam', '$JSON', '');
+
+                    ELSE
+                        UPDATE TableJointure SET TableJointure.JSON = '$JSON' WHERE StudentID = '$StudentID' AND
+                                                                                    ClassID = '$newClass' AND
+                                                                                    ExamID = '$newExam';
+
+                    END IF";
+
+            if ($conn->query($sql) === TRUE) {
+            //  echo "Informations inserted successfully <br>";
+            } else {
+                echo "Error inserting informations: <br>" . $conn->error;
+            }
+        }
+
+    ?>
 
     <!-- Footer -->
     <footer class="t6">&copy; Copyright Université Paul Sabatier - Tout droit réservé - Version 12</footer>

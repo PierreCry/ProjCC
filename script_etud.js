@@ -1,4 +1,3 @@
-
 var currentWindow = "t1";
 var nb_fen;
 var i;
@@ -142,6 +141,25 @@ function closeForm2() {
     document.getElementById("myForm2").style.display = "none";
     test2 = 0;
 }
+
+var test3 = 0;
+
+function openForm3() {
+    if(test3 == 0) {
+        document.getElementById("myForm3").style.display = "block";
+        test3 = 1;
+    }
+    else {
+        document.getElementById("myForm3").style.display = "none";
+        test3 = 0;
+    }
+}
+
+function closeForm3() {
+    document.getElementById("myForm3").style.display = "none";
+    test3 = 0;
+}
+
 
 //***************************************
 
